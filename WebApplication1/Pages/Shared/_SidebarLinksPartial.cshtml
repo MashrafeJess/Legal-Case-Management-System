@@ -1,0 +1,71 @@
+﻿@using System.Security.Claims
+@{
+    string role = User.Identity.IsAuthenticated ? User.FindFirst(ClaimTypes.Role)?.Value : null;
+    bool isAuthenticated = User.Identity.IsAuthenticated;
+}
+
+<div class="d-flex align-items-center gap-2 p-2 mb-2"
+     style="border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); border-radius: 18px;">
+    <div class="side-icon"><i class="bi bi-briefcase"></i></div>
+    <div class="flex-grow-1">
+        <div class="fw-semibold">Workspace</div>
+        <div class="text-white-50 small">Cases • Hearings</div>
+    </div>
+    <a class="btn btn-sm icon-btn" href="" title="Quick Add">
+        <i class="bi bi-plus-lg"></i>
+    </a>
+</div>
+
+<div class="side-section-title">Core</div>
+
+<a class="side-link active" href="">
+    <span class="side-icon"><i class="bi bi-speedometer2"></i></span>
+    Dashboard
+</a>
+
+<a class="side-link" href="">
+    <span class="side-icon"><i class="bi bi-folder2-open"></i></span>
+    Cases
+</a>
+
+<a class="side-link" href="">
+    <span class="side-icon"><i class="bi bi-people"></i></span>
+    Clients
+</a>
+
+<a class="side-link" href="">
+    <span class="side-icon"><i class="bi bi-calendar-event"></i></span>
+    Hearings
+</a>
+
+<a class="side-link" href="">
+    <span class="side-icon"><i class="bi bi-journal-text"></i></span>
+    Documents
+</a>
+
+<div class="side-section-title">Finance</div>
+
+<a class="side-link" href="">
+    <span class="side-icon"><i class="bi bi-receipt"></i></span>
+    Invoices
+</a>
+
+<a class="side-link" href="">
+    <span class="side-icon"><i class="bi bi-credit-card"></i></span>
+    Payments
+</a>
+
+@if (isAuthenticated && (role == "1" || role == "2"))
+{
+    <div class="side-section-title">Admin</div>
+
+    <a class="side-link" href="">
+        <span class="side-icon"><i class="bi bi-shield-check"></i></span>
+        Users & Roles
+    </a>
+
+    <a class="side-link" href="">
+        <span class="side-icon"><i class="bi bi-gear"></i></span>
+        System Settings
+    </a>
+}

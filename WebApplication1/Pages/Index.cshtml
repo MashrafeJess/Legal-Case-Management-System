@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center py-5">
+    <h1 class="fw-semibold mb-3">Legal Case Management System</h1>
+    <p class="text-white-50 mb-4">
+        Manage cases, clients, hearings, and documents in one secure platform.
+    </p>
+
+    <div class="d-flex justify-content-center gap-2">
+        <a class="btn btn-light px-4"
+           asp-controller="Dashboard"
+           asp-action="Index">
+            Go to Dashboard
+        </a>
+
+        <a class="btn btn-outline-light px-4"
+           asp-page="/Account/Login">
+            Login
+        </a>
+    </div>
+</div>

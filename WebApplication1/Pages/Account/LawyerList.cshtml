@@ -1,0 +1,62 @@
+﻿@page
+@model WebApplication1.Pages.Account.LawyerListModel
+@{
+}
+
+@{
+    ViewData["Title"] = "User Registration";
+}
+
+@{
+    ViewData["Title"] = "User List";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">User List</h4>
+
+                    <table class="table table-bordered table-hover table-striped align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>User ID</th>
+                                <th>User Name</th>
+                                <th>Password</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Role ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.List.Any())
+                            {
+                                foreach (var user in Model.List)
+                                {
+                                    <tr>
+                                        <td>@user.UserId</td>
+                                        <td>@user.UserName</td>
+                                        <td>@user.Password</td>
+                                        <td>@user.Email</td>
+                                        <td>@user.Address</td>
+                                        <td>@user.RoleId</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        No records found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

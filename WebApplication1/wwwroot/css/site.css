@@ -1,0 +1,220 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+/* ==========================
+   FULL DARK THEME (LCMS)
+   ========================== */
+
+:root {
+    --bg0: #020617;
+    --bg1: #0b1220;
+    --card: #0f172a;
+    --card2: #111c33;
+    --text: #e5e7eb;
+    --muted: #a1a1aa;
+    --border: rgba(255,255,255,.12);
+    --border2: rgba(148,163,184,.28);
+    --shadow: 0 18px 50px rgba(0,0,0,.35);
+    --accent: #60a5fa;
+    --good: #22c55e;
+    --warn: #f59e0b;
+    --info: #06b6d4;
+    --danger: #ef4444;
+}
+
+html, body {
+    height: 100%;
+    background: radial-gradient(circle at top, var(--bg1), var(--bg0)) !important;
+    color: var(--text) !important;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+a {
+    color: var(--accent);
+}
+
+    a:hover {
+        color: #93c5fd;
+    }
+
+/* Containers / layout helpers */
+.page-wrap {
+    padding: 24px;
+}
+
+/* Cards / panels (makes your white boxes dark) */
+.card,
+.panel,
+.box,
+.widget,
+.content-card,
+.stat-card,
+.dashboard-card {
+    background: rgba(15, 23, 42, 0.92) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 18px !important;
+    box-shadow: var(--shadow);
+}
+
+/* Headings & general text */
+h1, h2, h3, h4, h5, h6 {
+    color: #fff !important;
+}
+
+p, span, small, label, div {
+    color: var(--text);
+}
+
+.text-muted, .text-secondary {
+    color: var(--muted) !important;
+}
+
+/* Inputs */
+input, select, textarea {
+    background: rgba(2, 6, 23, 0.75) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border2) !important;
+    border-radius: 12px !important;
+}
+
+    input::placeholder, textarea::placeholder {
+        color: rgba(229,231,235,.55) !important;
+    }
+
+/* Buttons */
+.btn {
+    border-radius: 12px !important;
+}
+
+.btn-outline-light {
+    color: #fff !important;
+    border-color: rgba(255,255,255,.25) !important;
+}
+
+    .btn-outline-light:hover {
+        background: rgba(255,255,255,.08) !important;
+    }
+
+.btn-light {
+    background: #fff !important;
+    color: #0b1220 !important;
+    border: none !important;
+}
+
+    .btn-light:hover {
+        background: #e5e7eb !important;
+    }
+
+/* Table readability */
+table {
+    color: var(--text) !important;
+    width: 100%;
+}
+
+    table thead th {
+        color: #fff !important;
+        border-bottom: 1px solid var(--border) !important;
+    }
+
+    table tbody td {
+        border-top: 1px solid rgba(255,255,255,.08) !important;
+        color: var(--text) !important;
+    }
+
+    table tbody tr:hover {
+        background: rgba(255,255,255,.04) !important;
+    }
+
+/* Badges / pills */
+.badge, .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 12px;
+    color: #0b1220 !important;
+}
+
+.badge-good {
+    background: var(--good) !important;
+}
+
+.badge-warn {
+    background: var(--warn) !important;
+}
+
+.badge-info {
+    background: var(--info) !important;
+}
+
+.badge-danger {
+    background: var(--danger) !important;
+}
+
+/* Empty state */
+.empty {
+    padding: 28px;
+    border: 1px dashed rgba(255,255,255,.18);
+    border-radius: 18px;
+    background: rgba(2, 6, 23, 0.35);
+    color: rgba(229,231,235,.75);
+}
+
+/* Dashboard grid quick helpers */
+.grid {
+    display: grid;
+    gap: 18px;
+}
+
+.grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+    .grid-4 {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .grid-4, .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}

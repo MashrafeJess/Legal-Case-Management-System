@@ -6,16 +6,18 @@ using Database.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Business
+namespace Business.Services
 {
     public class PaymentService
     {
         private readonly LMSContext context = new();
+
         public async Task<Result> AddPayment(Payment payment)
         {
             await context.Payment.AddAsync(payment);
             return new Result(true, "Case created successfully", payment);
         }
+
         public async Task<Result> UpdatePayment(Payment payment)
         {
             Payment? entity = await context.Payment.FirstOrDefaultAsync(u => u.PaymentId == payment.PaymentId);
@@ -25,8 +27,9 @@ namespace Business
             }
             entity = payment;
             context.Payment.Update(entity);
-            return Result.DBcommit(context, "User info updated successfully", null, entity);
+            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
         }
+
         public async Task<Result> DeletePayment(Payment payment)
         {
             Payment? entity = await context.Payment.FirstOrDefaultAsync(u => u.PaymentId == payment.PaymentId);
@@ -36,13 +39,15 @@ namespace Business
             }
             entity.IsDeleted = true;
             context.Payment.Update(entity);
-            return Result.DBcommit(context, "User info updated successfully", null, entity);
+            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
         }
+
         public async Task<Result> AllCases()
         {
             var list = await context.Payment.ToListAsync();
             return new Result(true, "All cases found", list);
         }
+
         public async Task<Result> CaseById(string PaymentId)
         {
             Case? entity = await context.Case.FindAsync(PaymentId);
@@ -52,8 +57,5 @@ namespace Business
             }
             return new Result(true, "The user is found", entity);
         }
-
-
-
     }
 }

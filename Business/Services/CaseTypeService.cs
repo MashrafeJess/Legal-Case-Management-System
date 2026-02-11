@@ -2,16 +2,18 @@
 using Database.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace Business
+namespace Business.Services
 {
     public class CaseTypeService
     {
         private readonly LMSContext context = new();
+
         public async Task<Result> AddCase(CaseType type)
         {
             await context.CaseType.AddAsync(type);
             return new Result(true, "Case created successfully", type);
         }
+
         public async Task<Result> UpdateCase(CaseType type)
         {
             CaseType? entity = await context.CaseType.FirstOrDefaultAsync(u => u.CaseTypeId == type.CaseTypeId);
@@ -21,8 +23,9 @@ namespace Business
             }
             entity = type;
             context.CaseType.Update(entity);
-            return Result.DBcommit(context, "User info updated successfully", null, entity);
+            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
         }
+
         public async Task<Result> DeleteCase(CaseType type)
         {
             CaseType? entity = await context.CaseType.FirstOrDefaultAsync(u => u.CaseTypeId == type.CaseTypeId);
@@ -32,13 +35,15 @@ namespace Business
             }
             entity.IsDeleted = true;
             context.CaseType.Update(entity);
-            return Result.DBcommit(context, "User info updated successfully", null, entity);
+            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
         }
+
         public async Task<Result> AllCases()
         {
             var list = await context.CaseType.ToListAsync();
             return new Result(true, "All cases found", list);
         }
+
         public async Task<Result> CaseTypeById(string CaseId)
         {
             CaseType? entity = await context.CaseType.FindAsync(CaseId);
@@ -48,8 +53,5 @@ namespace Business
             }
             return new Result(true, "The user is found", entity);
         }
-
-
-
     }
 }

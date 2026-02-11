@@ -6,16 +6,18 @@ using Database.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Business
+namespace Business.Services
 {
     public class CommentService
     {
         private readonly LMSContext context = new();
+
         public async Task<Result> AddCase(Comment comment)
         {
             await context.Comment.AddAsync(comment);
             return new Result(true, "Case created successfully", comment);
         }
+
         public async Task<Result> UpdateCase(Comment comment)
         {
             Comment? entity = await context.Comment.FirstOrDefaultAsync(u => u.CommentId == comment.CommentId);
@@ -25,8 +27,9 @@ namespace Business
             }
             entity = comment;
             context.Comment.Update(entity);
-            return Result.DBcommit(context, "User info updated successfully", null, entity);
+            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
         }
+
         public async Task<Result> DeleteCase(Case cases)
         {
             Case? entity = await context.Case.FirstOrDefaultAsync(u => u.CaseId == cases.CaseId);
@@ -36,8 +39,9 @@ namespace Business
             }
             entity.IsDeleted = true;
             context.Case.Update(entity);
-            return Result.DBcommit(context, "User info updated successfully", null, entity);
+            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
         }
+
         public async Task<Result> AllComments(string caseId)
         {
             var list = await context.Comment
@@ -56,8 +60,5 @@ namespace Business
             }
             return new Result(true, "The user is found", entity);
         }
-
-
-
     }
 }

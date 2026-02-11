@@ -1,8 +1,11 @@
+using Business;
+using Database.Context;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication1
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -10,6 +13,7 @@ namespace WebApplication1
 
             // Add services to the container.
             builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+            builder.Services.AddScoped<LMSContext>();
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -19,10 +23,7 @@ namespace WebApplication1
                 });
 
             builder.Services.AddAuthorization();
-            builder.Services.AddRazorPages(options =>
-            {
-                options.Conventions.AuthorizeFolder("/");
-            });
+            builder.Services.AddRazorPages(options => options.Conventions.AuthorizeFolder("/"));
 
             var app = builder.Build();
 

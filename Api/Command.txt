@@ -1,0 +1,8 @@
+﻿//Create Migration
+dotnet ef migrations add <Migration Name> --project Database
+
+//Migration Rollback
+dotnet ef migrations remove --project Database
+
+//Update DB
+dotnet ef database update --project Database

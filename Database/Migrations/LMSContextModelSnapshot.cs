@@ -24,9 +24,12 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Case", b =>
                 {
-                    b.Property<string>("CaseId")
+                    b.Property<int>("CaseId")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CaseId"));
 
                     b.Property<string>("CaseHandlingBy")
                         .IsRequired()
@@ -48,14 +51,14 @@ namespace Database.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Fee")
+                        .HasColumnType("integer");
+
                     b.Property<int>("HearingNumber")
                         .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("integer");
 
                     b.Property<string>("UpdatedBy")
                         .HasMaxLength(120)
@@ -94,9 +97,6 @@ namespace Database.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("integer");
 
                     b.Property<string>("UpdatedBy")
                         .HasMaxLength(120)
@@ -150,6 +150,63 @@ namespace Database.Migrations
                     b.HasKey("CommentId");
 
                     b.ToTable("Comment");
+                });
+
+            modelBuilder.Entity("Database.Model.FileEntity", b =>
+                {
+                    b.Property<string>("FileId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("CaseId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("CreatedByUserUserId")
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("FileId");
+
+                    b.HasIndex("CreatedByUserUserId");
+
+                    b.ToTable("FileEntity");
                 });
 
             modelBuilder.Entity("Database.Model.Hearing", b =>
@@ -296,6 +353,29 @@ namespace Database.Migrations
                     b.HasKey("RoleId");
 
                     b.ToTable("Role");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            RoleName = "Lawyer"
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            RoleName = "Client"
+                        });
                 });
 
             modelBuilder.Entity("Database.Model.SmtpSettings", b =>
@@ -431,7 +511,29 @@ namespace Database.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("RoleId");
+
                     b.ToTable("User");
+                });
+
+            modelBuilder.Entity("Database.Model.FileEntity", b =>
+                {
+                    b.HasOne("Database.Model.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserUserId");
+
+                    b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("Database.Model.User", b =>
+                {
+                    b.HasOne("Database.Model.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 #pragma warning restore 612, 618
         }

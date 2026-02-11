@@ -8,7 +8,7 @@ namespace Database.Context
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(
-                @"Host=localhost;Port=5432;Database=LMS;Username=postgres;Password=22345;",
+                "Host=localhost;Port=5432;Database=LMS;Username=postgres;Password=22345;",
                 npgsqlOptions => npgsqlOptions.EnableRetryOnFailure());
         }
 
@@ -22,5 +22,50 @@ namespace Database.Context
         public DbSet<Role> Role { get; set; }
         public DbSet<User> User { get; set; }
         public DbSet<CaseType> CaseType { get; set; }
+        public DbSet<FileEntity> FileEntity { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //modelBuilder.Entity<User>().HasData(
+            //    new User
+            //    {
+            //        UserId = "ffffff-ffffff-fffffffff-ffffffffffffffff",
+            //        UserName = "Mashrafe",
+            //        Password = "abc12345",
+            //        Email = "mashrafeiubat@gmail.com",
+            //        Address = null,
+            //        RoleId = 1,
+            //    }
+            //);
+            modelBuilder.Entity<Role>().HasData(
+                new Role
+                {
+                    RoleId = 1,
+                    RoleName = "Admin",
+                    CreatedBy = null,
+                    UpdatedBy = null,
+                    CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
+                    UpdatedDate = null
+                },
+                new Role
+                {
+                    RoleId = 2,
+                    RoleName = "Lawyer",
+                    CreatedBy = null,
+                    UpdatedBy = null,
+                    CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
+                    UpdatedDate = null
+                },
+                new Role
+                {
+                    RoleId = 3,
+                    RoleName = "Client",
+                    CreatedBy = null,
+                    UpdatedBy = null,
+                    CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
+                    UpdatedDate = null
+                }
+            );
+        }
     }
 }

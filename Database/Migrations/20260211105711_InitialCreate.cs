@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Database.Migrations
 {
     /// <inheritdoc />
-    public partial class InitailCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,17 +16,18 @@ namespace Database.Migrations
                 name: "Case",
                 columns: table => new
                 {
-                    CaseId = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CaseId = table.Column<int>(type: "integer", maxLength: 120, nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<string>(type: "text", nullable: false),
                     CaseName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     CaseType = table.Column<int>(type: "integer", nullable: false),
                     CaseHandlingBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     HearingNumber = table.Column<int>(type: "integer", nullable: false),
-                    Price = table.Column<int>(type: "integer", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    Fee = table.Column<int>(type: "integer", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -41,11 +42,10 @@ namespace Database.Migrations
                     CaseTypeId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CaseTypeDescription = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<int>(type: "integer", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -61,10 +61,10 @@ namespace Database.Migrations
                     CommentText = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     UserId = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     CaseId = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -81,10 +81,10 @@ namespace Database.Migrations
                     CaseId = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     HearingDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsGoing = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -99,10 +99,10 @@ namespace Database.Migrations
                     PaymentId = table.Column<string>(type: "text", nullable: false),
                     Amount = table.Column<int>(type: "integer", nullable: false),
                     PaymentMethodId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -118,10 +118,10 @@ namespace Database.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PaymentMethodName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     PaymentStatus = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -136,10 +136,10 @@ namespace Database.Migrations
                     RoleId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RoleName = table.Column<string>(type: "text", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -159,10 +159,10 @@ namespace Database.Migrations
                     Password = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     EnableSsl = table.Column<bool>(type: "boolean", nullable: false),
                     SenderEmail = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -191,23 +191,66 @@ namespace Database.Migrations
                 name: "User",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     UserName = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    Password = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
-                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    Address = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Address = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     RoleId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_User", x => x.UserId);
+                    table.ForeignKey(
+                        name: "FK_User_Role_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Role",
+                        principalColumn: "RoleId",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "FileEntity",
+                columns: table => new
+                {
+                    FileId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    FileName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    FilePath = table.Column<string>(type: "text", nullable: false),
+                    ContentType = table.Column<string>(type: "text", nullable: false),
+                    Size = table.Column<long>(type: "bigint", nullable: false),
+                    CaseId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedByUserUserId = table.Column<string>(type: "character varying(50)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FileEntity", x => x.FileId);
+                    table.ForeignKey(
+                        name: "FK_FileEntity_User_CreatedByUserUserId",
+                        column: x => x.CreatedByUserUserId,
+                        principalTable: "User",
+                        principalColumn: "UserId");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FileEntity_CreatedByUserUserId",
+                table: "FileEntity",
+                column: "CreatedByUserUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_RoleId",
+                table: "User",
+                column: "RoleId");
         }
 
         /// <inheritdoc />
@@ -223,6 +266,9 @@ namespace Database.Migrations
                 name: "Comment");
 
             migrationBuilder.DropTable(
+                name: "FileEntity");
+
+            migrationBuilder.DropTable(
                 name: "Hearing");
 
             migrationBuilder.DropTable(
@@ -232,9 +278,6 @@ namespace Database.Migrations
                 name: "PaymentMethod");
 
             migrationBuilder.DropTable(
-                name: "Role");
-
-            migrationBuilder.DropTable(
                 name: "SmtpSettings");
 
             migrationBuilder.DropTable(
@@ -242,6 +285,9 @@ namespace Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "User");
+
+            migrationBuilder.DropTable(
+                name: "Role");
         }
     }
 }

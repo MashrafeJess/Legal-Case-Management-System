@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Database.Model
@@ -25,6 +26,6 @@ namespace Database.Model
 
         public int CaseId { get; set; }
 
-        public User CreatedByUser { get; set; } = null!;  // Navigation property to User who uploaded
+        public User CaseUser { get; set; } = null!;  // Navigation property to User who uploaded
     }
 }

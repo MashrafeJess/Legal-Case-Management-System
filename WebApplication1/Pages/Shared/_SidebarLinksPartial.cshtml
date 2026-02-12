@@ -1,4 +1,4 @@
-﻿@using System.Security.Claims
+﻿@* @using System.Security.Claims
 @{
     string role = User.Identity.IsAuthenticated ? User.FindFirst(ClaimTypes.Role)?.Value : null;
     bool isAuthenticated = User.Identity.IsAuthenticated;
@@ -68,4 +68,4 @@
         <span class="side-icon"><i class="bi bi-gear"></i></span>
         System Settings
     </a>
-}
+} *@

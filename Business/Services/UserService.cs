@@ -4,6 +4,7 @@ using System.Text;
 using Business.DTO.AuthDto;
 using Database.Context;
 using Database.Model;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -12,9 +13,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Business.Services
 {
-    public class UserService(LMSContext context, IConfiguration config, ILogger<UserService> logger)
+    public class UserService(LMSContext context, IHttpContextAccessor accessor, IConfiguration config, ILogger<UserService> logger)
     {
         private readonly LMSContext _context = context;
+        private readonly IHttpContextAccessor _accessor = accessor;
         private readonly IConfiguration _config = config;
         private readonly ILogger<UserService> _logger = logger;
 
@@ -174,6 +176,8 @@ namespace Business.Services
                 return new Result(false, "User not found");
 
             u.IsDeleted = true;
+            u.UpdatedDate = DateTime.UtcNow;
+            u.UpdatedBy = _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
             _context.User.Update(u);
 
             return await Result.DBCommitAsync(_context, "User is deleted", null, "Failed to delete user", null);

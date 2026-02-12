@@ -22,7 +22,7 @@ namespace Api.Controllers
         }
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequestDto user)
+        public async Task<IActionResult> Login([FromBody]LoginRequestDto user)
         {
             var result = await _userService.Login(user);
             if (!result.Success) return BadRequest(result);

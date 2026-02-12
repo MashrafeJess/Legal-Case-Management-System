@@ -15,35 +15,35 @@
                     <form method="post">
 
                         <div class="mb-3">
-                            <label asp-for="@Model.cases.CaseName" class="form-label"></label>
-                            <input asp-for="@Model.cases.CaseName" class="form-control" />
-                            <span asp-validation-for="@Model.cases.CaseName" class="text-danger"></span>
+                            <label asp-for="@Model.Cases.CaseName" class="form-label"></label>
+                            <input asp-for="@Model.Cases.CaseName" class="form-control" />
+                            <span asp-validation-for="@Model.Cases.CaseName" class="text-danger"></span>
                         </div>
 
                         <!-- LAWYER DROPDOWN -->
                         <div class="mb-3">
-    <label asp-for="cases.CaseHandlingBy" class="form-label"></label>
+    <label asp-for="Cases.CaseHandlingBy" class="form-label"></label>
 
-    <select asp-for="cases.CaseHandlingBy"
+    <select asp-for="Cases.CaseHandlingBy"
             asp-items="Model.LawyerOptions"
             class="form-select">
         <option value="">-- Select Lawyer --</option>
     </select>
 
-    <span asp-validation-for="cases.CaseHandlingBy" class="text-danger"></span>
+    <span asp-validation-for="Cases.CaseHandlingBy" class="text-danger"></span>
 </div>
 
 
                         <div class="mb-3">
-                            <label asp-for="@Model.cases.HearingNumber" class="form-label"></label>
-                            <input asp-for="@Model.cases.HearingNumber" class="form-control" />
-                            <span asp-validation-for="@Model.cases.HearingNumber" class="text-danger"></span>
+                            <label asp-for="@Model.Cases.HearingNumber" class="form-label"></label>
+                            <input asp-for="@Model.Cases.HearingNumber" class="form-control" />
+                            <span asp-validation-for="@Model.Cases.HearingNumber" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="@Model.cases.Price" class="form-label"></label>
+                            @* <label asp-for="@Model.cases.Price" class="form-label"></label>
                             <input asp-for="@Model.cases.Price" class="form-control" />
-                            <span asp-validation-for="@Model.cases.Price" class="text-danger"></span>
+                            <span asp-validation-for="@Model.cases.Price" class="text-danger"></span> *@
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">

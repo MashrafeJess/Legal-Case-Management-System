@@ -10,25 +10,25 @@ namespace WebApplication1.Pages.Account
     public class RegistrationModel : PageModel
     {
         [BindProperty]
-        public User? user { get; set; }
+        public new User? User { get; set; }
 
         public void OnGet()
         {
         }
 
-        public async Task<IActionResult> OnPostAsync()
-        {
-            if (!ModelState.IsValid)
-                return Page();
+        //public async Task<IActionResult> OnPostAsync()
+        //{
+        //    if (!ModelState.IsValid)
+        //        return Page();
 
-            var service = new UserService();
-            Result result =  service.Registration(user);
+        //    var service = new UserService();
+        //    Result result =  service.Registration(user);
 
-            if (result.Success)
-                return RedirectToPage("/Account/Login");
+        //    if (result.Success)
+        //        return RedirectToPage("/Account/Login");
 
-            ModelState.AddModelError(string.Empty, result.Message);
-            return Page();
-        }
+        //    ModelState.AddModelError(string.Empty, result.Message);
+        //    return Page();
+        //}
     }
 }

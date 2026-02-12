@@ -34,11 +34,11 @@
                             <span class="input-group-text bg-transparent text-white-50 border-white border-opacity-10">
                                 <i class="bi bi-person"></i>
                             </span>
-                            <input asp-for="user.UserName"
+                            <input asp-for="User.UserName"
                                    class="form-control bg-transparent text-light border-white border-opacity-10"
                                    placeholder="e.g. Mashrafe Ahmed" />
                         </div>
-                        <span asp-validation-for="user.UserName" class="text-warning small"></span>
+                        <span asp-validation-for="User.UserName" class="text-warning small"></span>
                     </div>
 
                     <!-- Email -->
@@ -48,12 +48,12 @@
                             <span class="input-group-text bg-transparent text-white-50 border-white border-opacity-10">
                                 <i class="bi bi-envelope"></i>
                             </span>
-                            <input asp-for="user.Email"
+                            <input asp-for="User.Email"
                                    type="email"
                                    class="form-control bg-transparent text-light border-white border-opacity-10"
                                    placeholder="name@example.com" />
                         </div>
-                        <span asp-validation-for="user.Email" class="text-warning small"></span>
+                        <span asp-validation-for="User.Email" class="text-warning small"></span>
                     </div>
 
                    
@@ -65,7 +65,7 @@
                             <span class="input-group-text bg-transparent text-white-50 border-white border-opacity-10">
                                 <i class="bi bi-key"></i>
                             </span>
-                            <input asp-for="user.Password"
+                            <input asp-for="User.Password"
                                    type="password"
                                    class="form-control bg-transparent text-light border-white border-opacity-10"
                                    placeholder="Create a strong password"
@@ -80,7 +80,7 @@
                         <div class="text-white-50 small mt-2">
                             Use at least 8 characters. Mix letters, numbers, symbols.
                         </div>
-                        <span asp-validation-for="user.Password" class="text-warning small"></span>
+                        <span asp-validation-for="User.Password" class="text-warning small"></span>
                     </div>
 
                     <!-- Role / Account Type (optional placeholder)

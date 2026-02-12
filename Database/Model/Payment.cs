@@ -9,7 +9,8 @@ namespace Database.Model
     {
         [Key]
         public string PaymentId { get; set; } = string.Empty;
-        public int Amount { get; set; } 
+
+        public int Amount { get; set; }
         public int PaymentMethodId { get; set; }
     }
 }

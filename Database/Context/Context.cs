@@ -26,46 +26,35 @@ namespace Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<User>().HasData(
-            //    new User
-            //    {
-            //        UserId = "ffffff-ffffff-fffffffff-ffffffffffffffff",
-            //        UserName = "Mashrafe",
-            //        Password = "abc12345",
-            //        Email = "mashrafeiubat@gmail.com",
-            //        Address = null,
-            //        RoleId = 1,
-            //    }
-            //);
             modelBuilder.Entity<Role>().HasData(
-                new Role
-                {
-                    RoleId = 1,
-                    RoleName = "Admin",
-                    CreatedBy = null,
-                    UpdatedBy = null,
-                    CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedDate = null
-                },
-                new Role
-                {
-                    RoleId = 2,
-                    RoleName = "Lawyer",
-                    CreatedBy = null,
-                    UpdatedBy = null,
-                    CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedDate = null
-                },
-                new Role
-                {
-                    RoleId = 3,
-                    RoleName = "Client",
-                    CreatedBy = null,
-                    UpdatedBy = null,
-                    CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedDate = null
-                }
-            );
+            new Role
+            {
+                RoleId = 1,
+                RoleName = "Admin",
+                CreatedBy = null,
+                UpdatedBy = null,
+                CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
+                UpdatedDate = null
+            },
+            new Role
+            {
+                RoleId = 2,
+                RoleName = "Lawyer",
+                CreatedBy = null,
+                UpdatedBy = null,
+                CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
+                UpdatedDate = null
+            },
+            new Role
+            {
+                RoleId = 3,
+                RoleName = "Client",
+                CreatedBy = null,
+                UpdatedBy = null,
+                CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
+                UpdatedDate = null
+            }
+        );
         }
     }
 }

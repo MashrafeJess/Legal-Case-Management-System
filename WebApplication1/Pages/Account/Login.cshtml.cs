@@ -14,31 +14,33 @@ namespace WebApplication1.Pages.Account
     public class LoginModel : PageModel
     {
         [BindProperty]
-        public User user{ get; set; }
+        public new User? User { get; set; }
+
         public void OnGet()
         {
         }
-        public async Task<IActionResult> OnPostAsync()
-        {
-            Result result =  new UserService().Login(user);
-            if (result.Success)
-            {
-                User user = result.Data as User;
-                var claims = new List<Claim>
-                {
-                    new(ClaimTypes.NameIdentifier, user.UserId),
-                    new(ClaimTypes.Name,user.UserName),
-                    new(ClaimTypes.Role,user.RoleId.ToString())
-                };
 
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+        //public async Task<IActionResult> OnPostAsync()
+        //{
+        //    Result result =  new UserService().Login(user);
+        //    if (result.Success)
+        //    {
+        //        User user = result.Data as User;
+        //        var claims = new List<Claim>
+        //        {
+        //            new(ClaimTypes.NameIdentifier, user.UserId),
+        //            new(ClaimTypes.Name,user.UserName),
+        //            new(ClaimTypes.Role,user.RoleId.ToString())
+        //        };
 
-                return RedirectToPage("/Account/Dashboard");
-            }
-            else return Page();
-        }
+        //        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        //        var principal = new ClaimsPrincipal(identity);
+        //        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        //        return RedirectToPage("/Account/Dashboard");
+        //    }
+        //    else return Page();
+        //}
 
         public async Task<IActionResult> OnGetLogoutAsync()
         {

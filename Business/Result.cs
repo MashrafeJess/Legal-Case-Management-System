@@ -13,7 +13,8 @@ namespace Business
         public string? ErrorCode { get; set; }
         public string? StackTrace { get; set; }
 
-        public Result() { }
+        public Result()
+        { }
 
         public Result(
             bool success,
@@ -55,32 +56,32 @@ namespace Business
 
                 return new Result(true, successMessage, data);
             }
-            catch (DbUpdateException dbEx)
-            {
-                var msg = failedMessage ?? "Database update failed";
+            //catch (DbUpdateException dbEx)
+            //{
+            //    var msg = failedMessage ?? "Database update failed";
 
-                logger?.LogError(dbEx,
-                    "DB Update Exception | Message: {Message}",
-                    dbEx.Message);
+            //    logger?.LogError(dbEx,
+            //        "DB Update Exception | Message: {Message}",
+            //        dbEx.Message);
 
-                return new Result(
-                    false,
-                    msg,
-                    null,
-                    errorCode: "DB_UPDATE_ERROR",
-                    stackTrace: dbEx.StackTrace
-                );
-            }
-            catch (OperationCanceledException)
-            {
-                logger?.LogWarning("DB Commit cancelled");
+            //    return new Result(
+            //        false,
+            //        msg,
+            //        null,
+            //        errorCode: "DB_UPDATE_ERROR",
+            //        stackTrace: dbEx.StackTrace
+            //    );
+            //}
+            //catch (OperationCanceledException)
+            //{
+            //    logger?.LogWarning("DB Commit cancelled");
 
-                return new Result(
-                    false,
-                    "Operation cancelled",
-                    errorCode: "OPERATION_CANCELLED"
-                );
-            }
+            //    return new Result(
+            //        false,
+            //        "Operation cancelled",
+            //        errorCode: "OPERATION_CANCELLED"
+            //    );
+            //}
             catch (Exception ex)
             {
                 var msg = failedMessage ?? "Critical system error";

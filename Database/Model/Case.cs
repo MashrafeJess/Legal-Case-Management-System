@@ -1,16 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Database.Model
 {
     public class Case : BaseModel
     {
         [Key]
-        [StringLength(120)]
         [Required]
         public int CaseId { get; set; }
 
         [Required]
-        public string UserId { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
 
         [StringLength(50)]
         public string CaseName { get; set; } = String.Empty;
@@ -22,5 +22,11 @@ namespace Database.Model
 
         public int HearingNumber { get; set; }
         public int Fee { get; set; }
+
+        [ForeignKey(nameof(CaseHandlingBy))]
+        public User? CaseHandlingByUser { get; set; }
+
+        public CaseType? Type { get; set; }
+        public ICollection<FileEntity>? Files { get; set; }
     }
 }

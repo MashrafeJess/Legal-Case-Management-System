@@ -22,7 +22,7 @@ namespace Business.Services
             Directory.CreateDirectory(fullFolderPath);
 
             var fileName = $"{Guid.NewGuid()}_{file.FileName}";
-            var savePath = Path.Combine(_env.ContentRootPath, "Uploads", fileName);
+            var savePath = Path.Combine(_env.ContentRootPath, "Uploads", fileName); //Full folder path
 
             // Save physical file
             await using (var stream = new FileStream(savePath, FileMode.Create))
@@ -63,7 +63,7 @@ namespace Business.Services
         public async Task<Result> GetFilesAsync(int caseId)
         {
             var files = await _context.FileEntity
-                .Include(f => f.CreatedBy) // join User table for CreatedBy
+                .Include(f => f.CaseUser) // join User table for CreatedBy
                 .Where(f => f.CaseId == caseId)
                 .Select(f => new
                 {
@@ -72,7 +72,7 @@ namespace Business.Services
                     f.ContentType,
                     f.Size,
                     f.CreatedDate,
-                    CreatedBy = f.CreatedByUser!.UserName
+                    CreatedBy = f.CaseUser!.UserName
                 })
                 .ToListAsync();
 

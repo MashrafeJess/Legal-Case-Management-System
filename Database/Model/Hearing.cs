@@ -4,6 +4,7 @@ namespace Database.Model
 {
     public class Hearing : BaseModel
     {
+        [Key]
         public int HearingID { get; set; }
         [StringLength(120)]
         public string CaseId { get; set; } = string.Empty;

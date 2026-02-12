@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Database.Model
 {
@@ -24,6 +25,7 @@ namespace Database.Model
 
         public int RoleId { get; set; }
 
+        [ForeignKey(nameof(RoleId))]
         public Role? Role { get; set; }
     }
 }

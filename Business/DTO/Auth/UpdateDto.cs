@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Business.DTO.AuthDto
+namespace Business.DTO.Auth
 {
     public class UpdateDto
     {

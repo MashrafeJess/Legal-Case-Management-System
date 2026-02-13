@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Business.DTO.AuthDto;
+using Business.DTO.Auth;
 using Database.Context;
 using Database.Model;
 using Microsoft.AspNetCore.Http;

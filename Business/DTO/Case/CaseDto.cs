@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 
-namespace Business.DTO.CaseDto
+namespace Business.DTO.Case
 {
     public class CaseDto
     {

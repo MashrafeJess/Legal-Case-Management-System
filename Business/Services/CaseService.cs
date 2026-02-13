@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using Business.DTO.CaseDto;
+using Business.DTO.Case;
 using Database.Context;
 using Database.Model;
 using Microsoft.AspNetCore.Http;

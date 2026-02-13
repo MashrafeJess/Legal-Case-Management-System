@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using Business.Services;
 using Database.Model;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers

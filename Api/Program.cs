@@ -1,5 +1,6 @@
 using System.Text;
 using Business.Services;
+using Business.Settings;
 using Database.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -47,6 +48,10 @@ builder.Services.AddSwaggerGen(options =>
         [new OpenApiSecuritySchemeReference("Bearer", document)] = []
     });
 });
+// Settings
+builder.Services.Configure<SSLCommerzSettings>(
+    builder.Configuration.GetSection("SSLCommerz"));
+
 builder.Services.AddHttpContextAccessor(); // For accessing claims
 
 builder.Services.AddDbContext<LMSContext>(); // Context initialized
@@ -62,11 +67,20 @@ builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<SmtpService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<FileService>();
+builder.Services.AddScoped<PaymentService>();
+
 builder.Services.AddLogging();
 
 var allowedOrigins = builder.Configuration.GetValue<string>("allowedOrigins")?.Split(",") ?? ["*"];
+
 builder.Services.AddCors(options =>
 {
+    options.AddPolicy("NgrokPolicy", policy => //Allowing Ngrok and bypassing SSL Certificate
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins(allowedOrigins)
@@ -117,12 +131,18 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty; // 🔥 This makes Swagger open at root URL
     });
 }
+//Allowing Ngrok to work as a proxy
+app.Use(async (context, next) =>
+{
+    context.Request.Headers["ngrok-skip-browser-warning"] = "true";
+    await next();
+});
 
 app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseCors();
+app.UseCors("NgrokPolicy");
 
 app.UseAuthentication();
 

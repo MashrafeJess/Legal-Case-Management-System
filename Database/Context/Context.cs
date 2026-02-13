@@ -26,6 +26,17 @@ namespace Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<PaymentMethod>().HasData(
+                new PaymentMethod
+                {
+                    PaymentMethodId = 1,
+                    PaymentMethodName = "Bkash",
+                    CreatedBy = null,
+                    UpdatedBy = null,
+                    CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, DateTimeKind.Utc),
+                    UpdatedDate = null
+                }
+            );
             modelBuilder.Entity<Role>().HasData(
             new Role
             {

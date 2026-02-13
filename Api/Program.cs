@@ -67,7 +67,7 @@ builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<SmtpService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<FileService>();
-builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<OTPService>();
 
 builder.Services.AddLogging();
 

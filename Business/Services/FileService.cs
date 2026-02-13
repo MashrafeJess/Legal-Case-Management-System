@@ -22,7 +22,7 @@ namespace Business.Services
             Directory.CreateDirectory(fullFolderPath);
 
             var fileName = $"{Guid.NewGuid()}_{file.FileName}";
-            var savePath = Path.Combine(_env.ContentRootPath, "Uploads", fileName); //Full folder path
+            var savePath = Path.Combine(fullFolderPath, fileName); //Full folder path
 
             // Save physical file
             await using (var stream = new FileStream(savePath, FileMode.Create))
@@ -63,16 +63,13 @@ namespace Business.Services
         public async Task<Result> GetFilesAsync(int caseId)
         {
             var files = await _context.FileEntity
-                .Include(f => f.CaseUser) // join User table for CreatedBy
-                .Where(f => f.CaseId == caseId)
+                .Where(f => f.CaseId == caseId && !f.IsDeleted)
                 .Select(f => new
                 {
                     f.FileId,
                     f.FileName,
                     f.ContentType,
-                    f.Size,
-                    f.CreatedDate,
-                    CreatedBy = f.CaseUser!.UserName
+                    f.Size
                 })
                 .ToListAsync();
 
@@ -82,14 +79,60 @@ namespace Business.Services
         }
 
         // Delete file (soft delete)
-        public async Task<Result> DeleteFileAsync(int fileId)
+        public async Task<Result> DeleteFileAsync(string fileId)
         {
             var file = await _context.FileEntity.FindAsync(fileId);
             if (file == null) return new Result(false, "File not found");
 
             file.IsDeleted = true;
+
             _context.FileEntity.Update(file);
             return await Result.DBCommitAsync(_context, "File deleted");
         }
+
+        //Individual File
+        public async Task<Result> FileById(string fileId)
+        {
+            var file = await _context.FileEntity.Where(f => f.FileId == fileId && !f.IsDeleted)
+                        .Select(f => new
+                        {
+                            f.FileId,
+                            f.FileName,
+                            f.Description,
+                            f.ContentType,
+                            f.Size,
+                            CreatedBy = _context.User
+                                .Where(c => c.UserId == f.CreatedBy)
+                                .Select(c => c.UserName)
+                                .FirstOrDefault() ?? "Unknown",
+                            UpdatedBy = _context.User
+                                .Where(c => c.UserId == f.UpdatedBy)
+                                .Select(c => c.UserName)
+                                .FirstOrDefault() ?? "Unknown",
+                        })
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync();
+            if (file == null)
+            {
+                return new Result(false, "No file found");
+            }
+            return new Result(true, "File Fetched Successfully", file);
+        }
+
+        public async Task<Result> DownloadAsync(string fileId)
+        {
+            var file = await _context.FileEntity
+                .AsNoTracking()
+                .FirstOrDefaultAsync(f => f.FileId == fileId);
+
+            if (file == null)
+                return new Result(false, "File not found");
+
+            if (!System.IO.File.Exists(file.FilePath))
+                return new Result(false, "File does not exist on server");
+
+            return new Result(true, "File ready to download", file);
+        }
+
     }
 }

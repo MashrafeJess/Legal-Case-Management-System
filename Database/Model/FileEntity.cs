@@ -10,13 +10,12 @@ namespace Database.Model
     {
         [Key]
         [StringLength(128)]
-        public string FileId { get; set; } = new Guid().ToString();
+        public string FileId { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         [StringLength(100)]
         public string FileName { get; set; } = null!;  // Original name
 
-        [Required]
         [StringLength(200)]
         public string Description { get; set; } = string.Empty;     // Optional description
 
@@ -25,7 +24,5 @@ namespace Database.Model
         public long Size { get; set; }
 
         public int CaseId { get; set; }
-
-        public User CaseUser { get; set; } = null!;  // Navigation property to User who uploaded
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using Business.DTO.AuthDto;
+using Business.DTO.Auth;
 using Business.Services;
 using Database.Model;
 using Microsoft.AspNetCore.Authorization;
@@ -20,9 +20,10 @@ namespace Api.Controllers
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }
+
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody]LoginRequestDto user)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto user)
         {
             var result = await _userService.Login(user);
             if (!result.Success) return BadRequest(result);
@@ -49,7 +50,6 @@ namespace Api.Controllers
 
         [HttpGet("GetAll")]
         [Authorize(Roles = "Admin")]
-
         public async Task<IActionResult> GetUserList()
         {
             var result = await _userService.AllUsers();

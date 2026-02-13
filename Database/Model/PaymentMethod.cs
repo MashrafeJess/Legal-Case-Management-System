@@ -9,10 +9,10 @@ namespace Database.Model
     {
         [Key]
         public int PaymentMethodId { get; set; }
+
         [StringLength(50)]
         public string PaymentMethodName { get; set; } = string.Empty;
-        public bool PaymentStatus { get; set; }
 
-
+        public bool PaymentStatus { get; set; } = true;
     }
 }

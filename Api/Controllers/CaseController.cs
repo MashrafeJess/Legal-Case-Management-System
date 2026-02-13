@@ -1,4 +1,4 @@
-﻿using Business.DTO.CaseDto;
+﻿using Business.DTO.Case;
 using Business.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,7 +35,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("case/getById")]
-        public async Task<IActionResult> GetById( int caseId)
+        public async Task<IActionResult> GetById(int caseId)
         {
             var result = await _service.CaseById(caseId);
             if (!result.Success) return BadRequest(result);
@@ -43,7 +43,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("case/delete")]
-        public async Task<IActionResult> Delete( int caseId)
+        public async Task<IActionResult> Delete(int caseId)
         {
             var result = await _service.DeleteCase(caseId);
             if (!result.Success) return BadRequest(result);

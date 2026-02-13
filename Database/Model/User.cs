@@ -27,5 +27,10 @@ namespace Database.Model
 
         [ForeignKey(nameof(RoleId))]
         public Role? Role { get; set; }
+
+        public static implicit operator string?(User? v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

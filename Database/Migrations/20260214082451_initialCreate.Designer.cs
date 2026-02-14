@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Database.Migrations
 {
     [DbContext(typeof(LMSContext))]
-    [Migration("20260214035112_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260214082451_initialCreate")]
+    partial class initialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -125,11 +125,13 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Comment", b =>
                 {
-                    b.Property<string>("CommentId")
-                        .HasColumnType("text");
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommentId"));
 
                     b.Property<int>("CaseId")
-                        .HasMaxLength(120)
                         .HasColumnType("integer");
 
                     b.Property<string>("CommentText")

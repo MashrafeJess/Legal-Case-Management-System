@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class UserController(UserService userService, IHttpContextAccessor httpContextAccessor) : Controller
     {
         private readonly UserService _userService = userService;
@@ -30,7 +32,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete("{userId}")]
         public async Task<IActionResult> Delete(string userId)
         {
             var result = await _userService.Delete(userId);
@@ -57,7 +59,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("Single")]
+        [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById(string userId)
         {
             var result = await _userService.UserById(userId);

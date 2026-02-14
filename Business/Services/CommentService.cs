@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Business.DTO.Comment;
 using Database.Context;
 using Database.Model;
 using Microsoft.AspNetCore.Identity;
@@ -8,57 +9,64 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services
 {
-    public class CommentService
+    public class CommentService(LMSContext context)
     {
-        private readonly LMSContext context = new();
+        private readonly LMSContext _context = context;
 
-        public async Task<Result> AddCase(Comment comment)
+        public async Task<Result> Create(CommentDto comment)
         {
-            await context.Comment.AddAsync(comment);
-            return new Result(true, "Case created successfully", comment);
+            var entity = new Comment
+            {
+                CommentText = comment.CommentText,
+                UserId = comment.UserId,
+                CaseId = comment.CaseId
+            };
+            await _context.Comment.AddAsync(entity);
+            var result = await Result.DBCommitAsync(_context, "Comment Created", null, "Creation Failed", entity);
+            return result;
         }
 
-        public async Task<Result> UpdateCase(Comment comment)
+        public async Task<Result> Update(Comment comment)
         {
-            Comment? entity = await context.Comment.FirstOrDefaultAsync(u => u.CommentId == comment.CommentId);
+            Comment? entity = await _context.Comment.FirstOrDefaultAsync(u => u.CommentId == comment.CommentId);
             if (entity == null)
             {
-                return new Result(false, "No user found");
+                return new Result(false, "No comment found");
             }
             entity = comment;
-            context.Comment.Update(entity);
-            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
+            _context.Comment.Update(entity);
+            return await Result.DBCommitAsync(_context, "Comment updated successfully", null, data: entity);
         }
 
-        public async Task<Result> DeleteCase(Case cases)
+        public async Task<Result> Delete(int commentId)
         {
-            Case? entity = await context.Case.FirstOrDefaultAsync(u => u.CaseId == cases.CaseId);
+            Comment? entity = await _context.Comment.FirstOrDefaultAsync(u => u.CommentId == commentId);
             if (entity == null)
             {
-                return new Result(false, "No user found");
+                return new Result(false, "No comment found");
             }
             entity.IsDeleted = true;
-            context.Case.Update(entity);
-            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
+            _context.Comment.Update(entity);
+            return await Result.DBCommitAsync(_context, "Comment updated successfully", null, data: entity);
         }
 
-        public async Task<Result> AllComments(int caseId)
+        public async Task<Result> Get(int caseId) // for particular case
         {
-            var list = await context.Comment
-                                    .Where(c => c.CaseId == caseId)
+            var list = await _context.Comment
+                                    .Where(c => c.CaseId == caseId && !c.IsDeleted)
                                     .ToListAsync();
 
-            return new Result(true, "All comments found", list);
+            return new Result(true, "All comments found for that comment", list);
         }
 
-        public async Task<Result> CommentById(int commentId)
+        public async Task<Result> GetById(int commentId)
         {
-            Case? entity = await context.Case.FindAsync(commentId);
+            Comment? entity = await _context.Comment.FindAsync(commentId);
             if (entity == null)
             {
-                return new Result(false, "This is user is not found");
+                return new Result(false, "This comment is not found");
             }
-            return new Result(true, "The user is found", entity);
+            return new Result(true, "The comment is found", entity);
         }
     }
 }

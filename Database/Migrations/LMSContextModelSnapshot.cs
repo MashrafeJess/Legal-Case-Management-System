@@ -122,11 +122,13 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Comment", b =>
                 {
-                    b.Property<string>("CommentId")
-                        .HasColumnType("text");
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommentId"));
 
                     b.Property<int>("CaseId")
-                        .HasMaxLength(120)
                         .HasColumnType("integer");
 
                     b.Property<string>("CommentText")

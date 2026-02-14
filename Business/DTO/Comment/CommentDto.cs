@@ -3,17 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace Database.Model
+namespace Business.DTO.Comment
 {
-    public class Comment : BaseModel
+    public class CommentDto
     {
-        [Key]
-        public int CommentId { get; set; }
-
-        [StringLength(250)]
         public string CommentText { get; set; } = string.Empty;
 
-        [StringLength(120)]
         public string UserId { get; set; } = string.Empty;
 
         public int CaseId { get; set; }

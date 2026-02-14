@@ -125,10 +125,9 @@ namespace Database.Migrations
                     b.Property<string>("CommentId")
                         .HasColumnType("text");
 
-                    b.Property<string>("CaseId")
-                        .IsRequired()
+                    b.Property<int>("CaseId")
                         .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CommentText")
                         .IsRequired()
@@ -224,10 +223,9 @@ namespace Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HearingID"));
 
-                    b.Property<string>("CaseId")
-                        .IsRequired()
+                    b.Property<int>("CaseId")
                         .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(120)
@@ -348,7 +346,7 @@ namespace Database.Migrations
                             CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             PaymentMethodName = "Bkash",
-                            PaymentStatus = false
+                            PaymentStatus = true
                         });
                 });
 

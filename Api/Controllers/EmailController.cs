@@ -1,5 +1,6 @@
 ﻿using Business;
 using Business.DTO.Mail;
+using Business.DTO.Smtp;
 using Business.Services;
 using Database;
 using Database.Model;
@@ -39,20 +40,12 @@ namespace Api.Controllers
         }
 
         [HttpPost("create-smtp")]
-        public async Task<IActionResult> CreateSmtp(SmtpSettings smtpConfig)
+        public async Task<IActionResult> CreateSmtp(SmtpDto smtpConfig)
         {
-            var result = await _service.AddSmtp(new SmtpSettings
-            {
-                Host = smtpConfig.Host,
-                Port = smtpConfig.Port,
-                Username = smtpConfig.Username,
-                Password = smtpConfig.Password,
-                EnableSsl = smtpConfig.EnableSsl,
-                SenderEmail = smtpConfig.SenderEmail
-            });
+            var result = await _service.AddSmtp(smtpConfig);
             if (result.Success)
             {
-                return Ok(result.Message);
+                return Ok(result);
             }
             else
             {
@@ -66,7 +59,7 @@ namespace Api.Controllers
             var result = await _service.UpdateSmtp(smtpConfig);
             if (result.Success)
             {
-                return Ok(result.Message);
+                return Ok(result);
             }
             else
             {
@@ -80,7 +73,7 @@ namespace Api.Controllers
             var result = await _service.GetSmtp(id);
             if (result.Success)
             {
-                return Ok(result.Message);
+                return Ok(result);
             }
             else
             {

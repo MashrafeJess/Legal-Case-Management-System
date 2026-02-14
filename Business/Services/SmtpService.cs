@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Business.DTO.Smtp;
 using Database;
 using Database.Context;
 using Database.Model;
@@ -12,10 +13,18 @@ namespace Business.Services
     {
         private readonly LMSContext _context = context;
 
-        public async Task<Result> AddSmtp(SmtpSettings smtpConfig)
+        public async Task<Result> AddSmtp(SmtpDto smtpConfig)
         {
-            await _context.SmtpSettings.AddAsync(smtpConfig);
-            return await Result.DBCommitAsync(_context, "SMTP Configuration Added Successfully", null, "Failed to Add SMTP Configuration", data: smtpConfig);
+            var entity = new SmtpSettings
+            {
+                Host = smtpConfig.Host,
+                Port = smtpConfig.Port,
+                Username = smtpConfig.Username,
+                SenderEmail = smtpConfig.SenderEmail,
+                Password = smtpConfig.Password,
+            };
+            await _context.SmtpSettings.AddAsync(entity);
+            return await Result.DBCommitAsync(_context, "SMTP Configuration Added Successfully", null, "Failed to Add SMTP Configuration", entity);
         }
 
         public async Task<Result> UpdateSmtp(SmtpSettings smtpConfig)
@@ -53,7 +62,7 @@ namespace Business.Services
             {
                 return new Result { Success = false, Message = "SMTP Configuration Not Found" };
             }
-            return new Result { Success = true, Message = "SMTP Configuration Retrieved Successfully", Data = smtpConfig };
+            return new Result(true,"Smtp retrieved successfully",smtpConfig);
         }
     }
 }

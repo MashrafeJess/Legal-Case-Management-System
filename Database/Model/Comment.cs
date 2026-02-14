@@ -14,6 +14,6 @@ namespace Database.Model
         [StringLength(120)]
         public string UserId { get; set; } = string.Empty;
         [StringLength(120)]
-        public string CaseId { get; set; } = string.Empty;
+        public int CaseId { get; set; }
     }
 }

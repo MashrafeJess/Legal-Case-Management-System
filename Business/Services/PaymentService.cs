@@ -81,6 +81,10 @@ namespace Business.Services
                 : SSLCommerzPaymentEnvironment.LIVE;
 
             var response = await AITSSLCommerzClient.CreatePaymentRequestAsync(payload, environment);
+            _logger.LogInformation("SSLCommerz Response — IsSuccess: {IsSuccess}, PaymentUrl: {PaymentUrl}, RawData: {Data}",
+    response.IsSuccess,
+    response.Data?.PaymentUrl,
+    System.Text.Json.JsonSerializer.Serialize(response.Data));
 
             if (!response.IsSuccess)
                 return new Result(false, "Failed to connect to SSLCommerz");

@@ -1,4 +1,5 @@
-﻿using Database.Context;
+﻿using Business.DTO.Type;
+using Database.Context;
 using Database.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +9,16 @@ namespace Business.Services
     {
         private readonly LMSContext _context = context;
 
-        public async Task<Result> Create(CaseType type)
+        public async Task<Result> Create(TypeDto type)
         {
-            await _context.CaseType.AddAsync(type);
+            var entity = new CaseType
+            {
+                CaseTypeName = type.CaseTypeName,
+                CaseTypeDescription = type.CaseTypeDescription
+            };
+            await _context.CaseType.AddAsync(entity);
 
-            return await Result.DBCommitAsync(_context, "Case Type created Successfully", null, "Failed to save", type);
+            return await Result.DBCommitAsync(_context, "Case Type created Successfully", null, "Failed to save", entity);
         }
 
         public async Task<Result> Update(CaseType type)

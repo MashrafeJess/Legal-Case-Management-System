@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Database.Migrations
 {
     /// <inheritdoc />
@@ -13,34 +15,12 @@ namespace Database.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Case",
-                columns: table => new
-                {
-                    CaseId = table.Column<int>(type: "integer", maxLength: 120, nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    CaseName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    CaseType = table.Column<int>(type: "integer", nullable: false),
-                    CaseHandlingBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    HearingNumber = table.Column<int>(type: "integer", nullable: false),
-                    Fee = table.Column<int>(type: "integer", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Case", x => x.CaseId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CaseType",
                 columns: table => new
                 {
                     CaseTypeId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CaseTypeName = table.Column<string>(type: "text", nullable: false),
                     CaseTypeDescription = table.Column<string>(type: "text", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -60,7 +40,7 @@ namespace Database.Migrations
                     CommentId = table.Column<string>(type: "text", nullable: false),
                     CommentText = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     UserId = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    CaseId = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CaseId = table.Column<int>(type: "integer", maxLength: 120, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
@@ -78,7 +58,7 @@ namespace Database.Migrations
                 {
                     HearingID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CaseId = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    CaseId = table.Column<int>(type: "integer", maxLength: 120, nullable: false),
                     HearingDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsGoing = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -90,24 +70,6 @@ namespace Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Hearing", x => x.HearingID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Payment",
-                columns: table => new
-                {
-                    PaymentId = table.Column<string>(type: "text", nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false),
-                    PaymentMethodId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
-                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Payment", x => x.PaymentId);
                 });
 
             migrationBuilder.CreateTable(
@@ -188,6 +150,34 @@ namespace Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Payment",
+                columns: table => new
+                {
+                    PaymentId = table.Column<string>(type: "text", nullable: false),
+                    CaseId = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: true),
+                    ValidationId = table.Column<string>(type: "text", nullable: true),
+                    TransactionId = table.Column<string>(type: "text", nullable: true),
+                    PaymentMethodId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payment", x => x.PaymentId);
+                    table.ForeignKey(
+                        name: "FK_Payment_PaymentMethod_PaymentMethodId",
+                        column: x => x.PaymentMethodId,
+                        principalTable: "PaymentMethod",
+                        principalColumn: "PaymentMethodId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "User",
                 columns: table => new
                 {
@@ -215,6 +205,41 @@ namespace Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Case",
+                columns: table => new
+                {
+                    CaseId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    CaseName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    CaseType = table.Column<int>(type: "integer", nullable: false),
+                    CaseHandlingBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    HearingNumber = table.Column<int>(type: "integer", nullable: false),
+                    Fee = table.Column<int>(type: "integer", nullable: false),
+                    TypeCaseTypeId = table.Column<int>(type: "integer", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Case", x => x.CaseId);
+                    table.ForeignKey(
+                        name: "FK_Case_CaseType_TypeCaseTypeId",
+                        column: x => x.TypeCaseTypeId,
+                        principalTable: "CaseType",
+                        principalColumn: "CaseTypeId");
+                    table.ForeignKey(
+                        name: "FK_Case_User_CaseHandlingBy",
+                        column: x => x.CaseHandlingBy,
+                        principalTable: "User",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FileEntity",
                 columns: table => new
                 {
@@ -225,7 +250,6 @@ namespace Database.Migrations
                     ContentType = table.Column<string>(type: "text", nullable: false),
                     Size = table.Column<long>(type: "bigint", nullable: false),
                     CaseId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedByUserUserId = table.Column<string>(type: "character varying(50)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedBy = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
@@ -236,16 +260,47 @@ namespace Database.Migrations
                 {
                     table.PrimaryKey("PK_FileEntity", x => x.FileId);
                     table.ForeignKey(
-                        name: "FK_FileEntity_User_CreatedByUserUserId",
-                        column: x => x.CreatedByUserUserId,
-                        principalTable: "User",
-                        principalColumn: "UserId");
+                        name: "FK_FileEntity_Case_CaseId",
+                        column: x => x.CaseId,
+                        principalTable: "Case",
+                        principalColumn: "CaseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "PaymentMethod",
+                columns: new[] { "PaymentMethodId", "CreatedBy", "CreatedDate", "IsDeleted", "PaymentMethodName", "PaymentStatus", "UpdatedBy", "UpdatedDate" },
+                values: new object[] { 1, null, new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc), false, "Bkash", true, null, null });
+
+            migrationBuilder.InsertData(
+                table: "Role",
+                columns: new[] { "RoleId", "CreatedBy", "CreatedDate", "IsDeleted", "RoleName", "UpdatedBy", "UpdatedDate" },
+                values: new object[,]
+                {
+                    { 1, null, new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc), false, "Admin", null, null },
+                    { 2, null, new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc), false, "Lawyer", null, null },
+                    { 3, null, new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc), false, "Client", null, null }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_FileEntity_CreatedByUserUserId",
+                name: "IX_Case_CaseHandlingBy",
+                table: "Case",
+                column: "CaseHandlingBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Case_TypeCaseTypeId",
+                table: "Case",
+                column: "TypeCaseTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FileEntity_CaseId",
                 table: "FileEntity",
-                column: "CreatedByUserUserId");
+                column: "CaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payment_PaymentMethodId",
+                table: "Payment",
+                column: "PaymentMethodId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_RoleId",
@@ -256,12 +311,6 @@ namespace Database.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Case");
-
-            migrationBuilder.DropTable(
-                name: "CaseType");
-
             migrationBuilder.DropTable(
                 name: "Comment");
 
@@ -275,13 +324,19 @@ namespace Database.Migrations
                 name: "Payment");
 
             migrationBuilder.DropTable(
-                name: "PaymentMethod");
-
-            migrationBuilder.DropTable(
                 name: "SmtpSettings");
 
             migrationBuilder.DropTable(
                 name: "Token");
+
+            migrationBuilder.DropTable(
+                name: "Case");
+
+            migrationBuilder.DropTable(
+                name: "PaymentMethod");
+
+            migrationBuilder.DropTable(
+                name: "CaseType");
 
             migrationBuilder.DropTable(
                 name: "User");

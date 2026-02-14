@@ -42,7 +42,7 @@ namespace Business.Services
             return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
         }
 
-        public async Task<Result> AllComments(string caseId)
+        public async Task<Result> AllComments(int caseId)
         {
             var list = await context.Comment
                                     .Where(c => c.CaseId == caseId)
@@ -51,9 +51,9 @@ namespace Business.Services
             return new Result(true, "All comments found", list);
         }
 
-        public async Task<Result> CommentById(string CaseId)
+        public async Task<Result> CommentById(int commentId)
         {
-            Case? entity = await context.Case.FindAsync(CaseId);
+            Case? entity = await context.Case.FindAsync(commentId);
             if (entity == null)
             {
                 return new Result(false, "This is user is not found");

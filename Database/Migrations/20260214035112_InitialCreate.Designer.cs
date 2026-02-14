@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Database.Migrations
 {
     [DbContext(typeof(LMSContext))]
-    [Migration("20260212213403_FourthCreate")]
-    partial class FourthCreate
+    [Migration("20260214035112_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,7 +29,6 @@ namespace Database.Migrations
                 {
                     b.Property<int>("CaseId")
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(120)
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CaseId"));
@@ -129,10 +128,9 @@ namespace Database.Migrations
                     b.Property<string>("CommentId")
                         .HasColumnType("text");
 
-                    b.Property<string>("CaseId")
-                        .IsRequired()
+                    b.Property<int>("CaseId")
                         .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CommentText")
                         .IsRequired()
@@ -174,9 +172,6 @@ namespace Database.Migrations
 
                     b.Property<int>("CaseId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("CaseUserUserId")
-                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
@@ -220,8 +215,6 @@ namespace Database.Migrations
 
                     b.HasIndex("CaseId");
 
-                    b.HasIndex("CaseUserUserId");
-
                     b.ToTable("FileEntity");
                 });
 
@@ -233,10 +226,9 @@ namespace Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HearingID"));
 
-                    b.Property<string>("CaseId")
-                        .IsRequired()
+                    b.Property<int>("CaseId")
                         .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(120)
@@ -274,6 +266,9 @@ namespace Database.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("integer");
 
+                    b.Property<int>("CaseId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
@@ -287,6 +282,12 @@ namespace Database.Migrations
                     b.Property<int>("PaymentMethodId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Status")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("text");
+
                     b.Property<string>("UpdatedBy")
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
@@ -294,7 +295,12 @@ namespace Database.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("ValidationId")
+                        .HasColumnType("text");
+
                     b.HasKey("PaymentId");
+
+                    b.HasIndex("PaymentMethodId");
 
                     b.ToTable("Payment");
                 });
@@ -335,6 +341,16 @@ namespace Database.Migrations
                     b.HasKey("PaymentMethodId");
 
                     b.ToTable("PaymentMethod");
+
+                    b.HasData(
+                        new
+                        {
+                            PaymentMethodId = 1,
+                            CreatedDate = new DateTime(2024, 2, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            PaymentMethodName = "Bkash",
+                            PaymentStatus = true
+                        });
                 });
 
             modelBuilder.Entity("Database.Model.Role", b =>
@@ -556,12 +572,17 @@ namespace Database.Migrations
                         .HasForeignKey("CaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
-                    b.HasOne("Database.Model.User", "CaseUser")
+            modelBuilder.Entity("Database.Model.Payment", b =>
+                {
+                    b.HasOne("Database.Model.PaymentMethod", "Method")
                         .WithMany()
-                        .HasForeignKey("CaseUserUserId");
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("CaseUser");
+                    b.Navigation("Method");
                 });
 
             modelBuilder.Entity("Database.Model.User", b =>

@@ -15,7 +15,7 @@ namespace Business.Services
         private readonly IHttpContextAccessor _accessor = accessor;
         private readonly ILogger<CaseService> _logger = logger;
 
-        public async Task<Result> AddCase(CaseDto cases)
+        public async Task<Result> AddCase(CreateCaseDto cases)
         {
             var entity = new Case
             {

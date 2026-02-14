@@ -1,4 +1,5 @@
-﻿using Business.Services;
+﻿using Business.DTO.Type;
+using Business.Services;
 using Database.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,7 @@ namespace Api.Controllers
         private readonly CaseTypeService _service = service;
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create(CaseType type)
+        public async Task<IActionResult> Create(TypeDto type)
         {
             var result = await _service.Create(type);
             if (!result.Success) return BadRequest(result);

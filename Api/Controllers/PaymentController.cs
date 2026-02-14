@@ -24,6 +24,7 @@ namespace Api.Controllers
         // SSLCommerz POSTs here on success
         [HttpPost("success")]
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Success([FromForm] string tran_id, [FromForm] string val_id)
         {
             var result = await _service.PaymentSuccessAsync(tran_id, val_id);
@@ -36,6 +37,7 @@ namespace Api.Controllers
         // SSLCommerz POSTs here on fail
         [HttpPost("fail")]
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Fail([FromForm] string tran_id)
         {
             await _service.PaymentFailAsync(tran_id);
@@ -45,6 +47,7 @@ namespace Api.Controllers
         // SSLCommerz POSTs here on cancel
         [HttpPost("cancel")]
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Cancel([FromForm] string tran_id)
         {
             await _service.PaymentCancelAsync(tran_id);

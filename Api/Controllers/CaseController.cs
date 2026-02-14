@@ -9,7 +9,7 @@ namespace Api.Controllers
         private readonly CaseService _service = service;
 
         [HttpPost("case/create")]
-        public async Task<IActionResult> CreateCase(CaseDto cases)
+        public async Task<IActionResult> CreateCase(CreateCaseDto cases)
         {
             var result = await _service.AddCase(cases);
             if (!result.Success) return BadRequest(result);

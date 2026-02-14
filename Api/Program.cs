@@ -1,4 +1,5 @@
 using System.Text;
+using Business.Jobs;
 using Business.Services;
 using Business.Settings;
 using Database.Context;
@@ -12,8 +13,6 @@ using Microsoft.OpenApi;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers(options =>
@@ -69,6 +68,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<OTPService>();
 
+builder.Services.AddHostedService<HearingReminderJob>(); // Background Job
+
 builder.Services.AddLogging();
 
 var allowedOrigins = builder.Configuration.GetValue<string>("allowedOrigins")?.Split(",") ?? ["*"];
@@ -83,7 +84,8 @@ builder.Services.AddCors(options =>
     });
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(allowedOrigins)
+        policy
+              .AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -138,11 +140,11 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.UseCors("NgrokPolicy");
+
 app.UseHttpsRedirection();
 
 app.UseRouting();
-
-app.UseCors("NgrokPolicy");
 
 app.UseAuthentication();
 

@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class FileController(FileService service, IHttpContextAccessor accessor) : Controller
     {
         private readonly FileService _service = service;
         private readonly IHttpContextAccessor _accessor = accessor;
 
-        [HttpPost("file/create")]
+        [HttpPost("create")]
         public async Task<IActionResult> Create(IFormFile file, int caseId)
         {
             string? userId = _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -19,7 +21,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("file/delete")]
+        [HttpDelete("delete")]
         public async Task<IActionResult> Delete(string fileId)
         {
             var result = await _service.DeleteFileAsync(fileId);
@@ -27,7 +29,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("file/getallbycaseid")]
+        [HttpGet("getallbycaseid")]
         public async Task<IActionResult> Get(int Id)
         {
             var result = await _service.GetFilesAsync(Id);
@@ -35,7 +37,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("file/getbyid")]
+        [HttpGet("getbyid")]
         public async Task<IActionResult> GetById(string Id)
         {
             var result = await _service.FileById(Id);

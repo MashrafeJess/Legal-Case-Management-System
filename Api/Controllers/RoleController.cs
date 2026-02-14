@@ -29,7 +29,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("alltype")]
+        [HttpGet("getall")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.AllRoles();
@@ -37,15 +37,15 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getById")]
-        public async Task<IActionResult> GetById(int typeId)
+        [HttpGet("getById/{roleId}")]
+        public async Task<IActionResult> GetById(int roleId)
         {
-            var result = await _service.RoleById(typeId);
+            var result = await _service.RoleById(roleId);
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete("delete/{roleId}")]
         public async Task<IActionResult> Delete(int roleId)
         {
             var result = await _service.DeleteRole(roleId);

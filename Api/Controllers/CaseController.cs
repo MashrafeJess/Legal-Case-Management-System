@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class CaseController(CaseService service) : Controller
     {
         private readonly CaseService _service = service;
 
-        [HttpPost("case/create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateCase(CreateCaseDto cases)
         {
             var result = await _service.AddCase(cases);
@@ -16,7 +18,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpPut("case/update")]
+        [HttpPut("update")]
         public async Task<IActionResult> UpdateCase(CaseDto cases)
         {
             if (cases == null)
@@ -26,7 +28,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("case/AllCase")]
+        [HttpGet("AllCase")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.AllCases();
@@ -34,7 +36,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("case/getById")]
+        [HttpGet("getById")]
         public async Task<IActionResult> GetById(int caseId)
         {
             var result = await _service.CaseById(caseId);
@@ -42,7 +44,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("case/delete")]
+        [HttpDelete("delete")]
         public async Task<IActionResult> Delete(int caseId)
         {
             var result = await _service.DeleteCase(caseId);

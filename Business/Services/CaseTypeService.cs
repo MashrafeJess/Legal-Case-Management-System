@@ -4,49 +4,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services
 {
-    public class CaseTypeService
+    public class CaseTypeService(LMSContext context)
     {
-        private readonly LMSContext context = new();
+        private readonly LMSContext _context = context;
 
-        public async Task<Result> AddCase(CaseType type)
+        public async Task<Result> Create(CaseType type)
         {
-            await context.CaseType.AddAsync(type);
-            return new Result(true, "Case created successfully", type);
+            await _context.CaseType.AddAsync(type);
+
+            return await Result.DBCommitAsync(_context, "Case Type created Successfully", null, "Failed to save", type);
         }
 
-        public async Task<Result> UpdateCase(CaseType type)
+        public async Task<Result> Update(CaseType type)
         {
-            CaseType? entity = await context.CaseType.FirstOrDefaultAsync(u => u.CaseTypeId == type.CaseTypeId);
+            CaseType? entity = await _context.CaseType.FirstOrDefaultAsync(u => u.CaseTypeId == type.CaseTypeId);
             if (entity == null)
             {
                 return new Result(false, "No user found");
             }
             entity = type;
-            context.CaseType.Update(entity);
-            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
+            _context.CaseType.Update(entity);
+            return await Result.DBCommitAsync(_context, "User info updated successfully", null, data: entity);
         }
 
-        public async Task<Result> DeleteCase(CaseType type)
+        public async Task<Result> Delete(int typeId)
         {
-            CaseType? entity = await context.CaseType.FirstOrDefaultAsync(u => u.CaseTypeId == type.CaseTypeId);
+            CaseType? entity = await _context.CaseType.FirstOrDefaultAsync(u => u.CaseTypeId == typeId);
             if (entity == null)
             {
                 return new Result(false, "No user found");
             }
             entity.IsDeleted = true;
-            context.CaseType.Update(entity);
-            return await Result.DBCommitAsync(context, "User info updated successfully", null, data: entity);
+            _context.CaseType.Update(entity);
+            return await Result.DBCommitAsync(_context, "User info updated successfully", null, data: entity);
         }
 
-        public async Task<Result> AllCases()
+        public async Task<Result> GetAll()
         {
-            var list = await context.CaseType.ToListAsync();
+            var list = await _context.CaseType.ToListAsync();
             return new Result(true, "All cases found", list);
         }
 
-        public async Task<Result> CaseTypeById(string CaseId)
+        public async Task<Result> GetById(int typeId)
         {
-            CaseType? entity = await context.CaseType.FindAsync(CaseId);
+            CaseType? entity = await _context.CaseType.FindAsync(typeId);
             if (entity == null)
             {
                 return new Result(false, "This is user is not found");

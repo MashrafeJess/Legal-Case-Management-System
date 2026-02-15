@@ -15,7 +15,7 @@ namespace Database.Model
         [StringLength(50)]
         public string CaseName { get; set; } = String.Empty;
 
-        public int CaseType { get; set; }
+        public int? CaseTypeId { get; set; }
 
         [StringLength(120)]
         public string CaseHandlingBy { get; set; } = string.Empty;
@@ -26,7 +26,9 @@ namespace Database.Model
         [ForeignKey(nameof(CaseHandlingBy))]
         public User? CaseHandlingByUser { get; set; }
 
+        [ForeignKey(nameof(CaseTypeId))]
         public CaseType? Type { get; set; }
+
         public ICollection<FileEntity>? Files { get; set; }
     }
 }

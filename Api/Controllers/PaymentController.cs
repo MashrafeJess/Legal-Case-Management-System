@@ -30,8 +30,8 @@ namespace Api.Controllers
             var result = await _service.PaymentSuccessAsync(tran_id, val_id);
 
             return result.Success
-                ? Redirect("https://yourfrontend.com/payment/success")
-                : Redirect("https://yourfrontend.com/payment/failed");
+                ? Redirect("http://localhost:4200/payment/success?tranId=" + tran_id)
+                : Redirect("http://localhost:4200/payment/failed");
         }
 
         // SSLCommerz POSTs here on fail
@@ -51,7 +51,7 @@ namespace Api.Controllers
         public async Task<IActionResult> Cancel([FromForm] string tran_id)
         {
             await _service.PaymentCancelAsync(tran_id);
-            return Redirect("https://yourfrontend.com/payment/cancelled");
+            return Redirect("http://localhost:4200/payment/cancelled");
         }
 
         // Get all payments for a case

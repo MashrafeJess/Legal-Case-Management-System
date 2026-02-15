@@ -226,22 +226,21 @@ namespace Business.Services
 
         public async Task<Result> GetAllLawyers()
         {
-            var list = await _context.User.Where(u => u.RoleId == 2)
-                .Select(u => new User
-                {
-                    UserId = u.UserId,
-                    UserName = u.UserName,
-                    Email = u.Email,
-                    RoleId = u.RoleId
-                })
-                .AsNoTracking()
-                .Include(u => u.Role)
-                .ToListAsync();
-            if (list.Count > 0)
-            {
-                return new Result(true, "All lawyers fetched", list);
-            }
-            return new Result(false, "No Lawyers found");
+            var list = await _context.User
+    .Where(u => u.RoleId == 2 && !u.IsDeleted)
+    .Select(u => new LoginResponseDto
+    {
+        UserId = u.UserId,
+        UserName = u.UserName,
+        Email = u.Email,
+        Role = u.Role!.RoleName
+    })
+    .AsNoTracking()
+    .ToListAsync();
+
+            return list.Count > 0
+                ? new Result(true, "All lawyers are fetched", list)
+                : new Result(false, "No lawyer found", list);
         }
     }
 }

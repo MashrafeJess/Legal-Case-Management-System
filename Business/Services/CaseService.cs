@@ -20,7 +20,7 @@ namespace Business.Services
             var entity = new Case
             {
                 CaseName = cases.CaseName,
-                CaseType = cases.CaseType,
+                CaseTypeId = cases.CaseTypeId,
                 Email = cases.Email,
                 Fee = cases.Fee,
                 CreatedBy = _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier),
@@ -60,8 +60,8 @@ namespace Business.Services
             if (!string.IsNullOrWhiteSpace(cases.CaseHandlingBy))
                 entity.CaseHandlingBy = cases.CaseHandlingBy;
 
-            if (cases.CaseType != 0)
-                entity.CaseType = cases.CaseType;
+            if (cases.CaseTypeId != 0)
+                entity.CaseTypeId = cases.CaseTypeId;
 
             if (!string.IsNullOrWhiteSpace(cases.Email))
                 entity.Email = cases.Email;
@@ -103,6 +103,7 @@ namespace Business.Services
                         .Select(u => new CaseDto
                         {
                             CaseId = u.CaseId,
+                            CaseName = u.CaseName,
                             CaseHandlingBy = u.CaseHandlingByUser!.UserName,
                             TypeName = u.Type!.CaseTypeName,
                             Email = u.Email,

@@ -8,7 +8,7 @@ namespace Business.DTO.Case
     public class CreateCaseDto
     {
         public string Email { get; set; } = string.Empty;
-        public int CaseType { get; set; }
+        public int CaseTypeId { get; set; }
         public string TypeName { get; set; } = string.Empty;
         public string CaseName { get; set; } = string.Empty;
         public string CaseHandlingBy { get; set; } = string.Empty;
@@ -20,7 +20,7 @@ namespace Business.DTO.Case
     {
         public int CaseId { get; set; }
         public string Email { get; set; } = string.Empty;
-        public int CaseType { get; set; }
+        public int CaseTypeId { get; set; }
         public string TypeName { get; set; } = string.Empty;
         public string CaseName { get; set; } = string.Empty;
         public string CaseHandlingBy { get; set; } = string.Empty;

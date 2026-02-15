@@ -66,5 +66,13 @@ namespace Api.Controllers
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }
+
+        [HttpGet("lawyers")]
+        public async Task<IActionResult> GetLawyerList()
+        {
+            var result = await _userService.GetAllLawyers();
+            if (!result.Success) return BadRequest(result);
+            return Ok(result);
+        }
     }
 }

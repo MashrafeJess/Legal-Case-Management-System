@@ -29,7 +29,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("alltype")]
+        [HttpGet("getall")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.AllPaymentMethods();
@@ -37,7 +37,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getById")]
+        [HttpGet("getById/{methodId}")]
         public async Task<IActionResult> GetById(int methodId)
         {
             var result = await _service.PaymentMethodById(methodId);
@@ -45,7 +45,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete("delete/{methodId}")]
         public async Task<IActionResult> Delete(int methodId)
         {
             var result = await _service.DeletePaymentMethod(methodId);

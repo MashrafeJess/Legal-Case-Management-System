@@ -28,7 +28,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("AllCase")]
+        [HttpGet("getall")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.AllCases();
@@ -36,7 +36,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getById")]
+        [HttpGet("getById/{caseId}")]
         public async Task<IActionResult> GetById(int caseId)
         {
             var result = await _service.CaseById(caseId);
@@ -44,7 +44,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete("delete/{caseId}")]
         public async Task<IActionResult> Delete(int caseId)
         {
             var result = await _service.DeleteCase(caseId);

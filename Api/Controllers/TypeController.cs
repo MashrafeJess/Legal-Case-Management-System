@@ -29,7 +29,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("alltype")]
+        [HttpGet("getall")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.GetAll();
@@ -37,7 +37,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getById")]
+        [HttpGet("getById/{typeId}")]
         public async Task<IActionResult> GetById(int typeId)
         {
             var result = await _service.GetById(typeId);
@@ -45,7 +45,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete("delete/{typeId}")]
         public async Task<IActionResult> Delete(int typeId)
         {
             var result = await _service.Delete(typeId);

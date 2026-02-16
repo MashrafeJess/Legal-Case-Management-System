@@ -54,5 +54,12 @@ namespace Api.Controllers
             var result = await _service.SendPendingCommentRemindersAsync();
             return result.Success ? Ok(result) : BadRequest(result);
         }
+
+        [HttpGet("by-case/{caseId}")]
+        public async Task<IActionResult> GetByCaseId(int caseId)
+        {
+            var result = await _service.GetHearingsByCaseIdAsync(caseId);
+            return result.Success ? Ok(result) : NotFound(result);
+        }
     }
 }

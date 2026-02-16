@@ -108,6 +108,7 @@ namespace Business.Services
                             TypeName = u.Type!.CaseTypeName,
                             Email = u.Email,
                             Fee = u.Fee,
+                            IsConsultationFeePaid = u.IsConsultationFeePaid
                         })
                         .AsNoTracking()
                         .ToListAsync();
@@ -121,41 +122,36 @@ namespace Business.Services
         public async Task<Result> CaseById(int caseId)
         {
             var entity = await _context.Case
-                .Where(u => u.CaseId == caseId && !u.IsDeleted)
-                .Select(u => new
+                .Where(c => c.CaseId == caseId && !c.IsDeleted)
+                .Select(c => new
                 {
-                    u.CaseId,
-                    u.CaseName,
-                    HandlingBy = u.CaseHandlingByUser!.UserName,
-                    u.Type!.CaseTypeName,
-                    u.Fee,
-                    u.CreatedDate,
-                    u.UpdatedDate,
-
-                    // Join to User table inline — single query, no null issues
+                    c.CaseId,
+                    c.CaseName,
+                    c.Email,
+                    c.Fee,
+                    c.IsConsultationFeePaid,           // ✅ fee paid flag
+                    HandlingBy = c.CaseHandlingByUser!.UserName,
+                    c.Type!.CaseTypeName,
+                    c.CreatedDate,
+                    c.UpdatedDate,
                     CreatedBy = _context.User
-                        .Where(c => c.UserId == u.CreatedBy)
-                        .Select(c => c.UserName)
+                        .Where(u => u.UserId == c.CreatedBy)
+                        .Select(u => u.UserName)
                         .FirstOrDefault() ?? "Unknown",
 
                     UpdatedBy = _context.User
-                        .Where(c => c.UserId == u.UpdatedBy)
-                        .Select(c => c.UserName)
+                        .Where(u => u.UserId == c.UpdatedBy)
+                        .Select(u => u.UserName)
                         .FirstOrDefault() ?? "Unknown",
-
-                    Files = u.Files!
+                    Files = c.Files!
                         .Where(f => !f.IsDeleted)
                         .Select(f => new
                         {
                             f.FileId,
                             f.FileName,
-                            f.Description,
-                            f.FilePath,
                             f.ContentType,
                             f.Size,
                             f.CreatedDate,
-                            f.UpdatedDate,
-
                             CreatedBy = _context.User
                                 .Where(c => c.UserId == f.CreatedBy)
                                 .Select(c => c.UserName)
@@ -165,15 +161,90 @@ namespace Business.Services
                                 .Where(c => c.UserId == f.UpdatedBy)
                                 .Select(c => c.UserName)
                                 .FirstOrDefault() ?? "Unknown",
-                        }).ToList()
+                        }),
+                    // ✅ Include hearings
+                    Hearings = _context.Hearing
+                        .Where(h => h.CaseId == caseId && !h.IsDeleted)
+                        .Select(h => new
+                        {
+                            h.HearingID,
+                            h.HearingDate,
+                            h.IsGoing,
+                            h.IsPaid,
+                            h.CreatedDate,
+                            h.CreatedBy
+                        })
+                        .ToList()
                 })
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
-            if (entity == null)
-                return new Result(false, "Case not found");
+            return entity != null
+                ? new Result(true, "Case found", entity)
+                : new Result(false, "Case not found");
+        }
 
-            return new Result(true, "Case found", entity);
+        public async Task<Result> GetAllCaseByLawyer(string userId)
+        {
+            var list = await _context.Case
+                        .Include(u => u.Type)
+                        .Where(u => u.CaseHandlingBy == userId && !u.IsDeleted)
+                        .Select(u => new CaseDto
+                        {
+                            CaseId = u.CaseId,
+                            CaseName = u.CaseName,
+                            CaseHandlingBy = u.CaseHandlingByUser!.UserName,
+                            TypeName = u.Type!.CaseTypeName,
+                            Email = u.Email,
+                            Fee = u.Fee,
+                            IsConsultationFeePaid = u.IsConsultationFeePaid
+                        })
+                        .AsNoTracking()
+                        .ToListAsync();
+            if (list.Count > 0)
+            {
+                return new Result(true, "All cases found", list);
+            }
+            return new Result(false, "Case Fetch Failed");
+        }
+        public async Task<Result> AllCases(string userId, string role)
+        {
+            var query = _context.Case.Where(u => !u.IsDeleted);
+
+            if (role == "Client")
+            {
+                // ✅ Client sees only cases matching their email
+                var userEmail = await _context.User
+                    .Where(u => u.UserId == userId)
+                    .Select(u => u.Email)
+                    .FirstOrDefaultAsync();
+
+                query = query.Where(u => u.Email == userEmail);
+            }
+            else if (role == "Lawyer")
+            {
+                // Lawyer sees cases assigned to them
+                query = query.Where(u => u.CaseHandlingBy == userId);
+            }
+            // Admin sees all — no filter
+
+            var list = await query
+                .Select(u => new CaseDto
+                {
+                    CaseId = u.CaseId,
+                    CaseName = u.CaseName,
+                    CaseHandlingBy = u.CaseHandlingByUser!.UserName,
+                    TypeName = u.Type!.CaseTypeName,
+                    Email = u.Email,
+                    Fee = u.Fee,
+                    IsConsultationFeePaid = u.IsConsultationFeePaid
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            return list.Count > 0
+                ? new Result(true, "All cases found", list)
+                : new Result(false, "Case Fetch Failed");
         }
     }
 }

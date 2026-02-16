@@ -1,4 +1,5 @@
-﻿using Business.DTO.Payment;
+﻿using System.Security.Claims;
+using Business.DTO.Payment;
 using Business.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,10 +28,12 @@ namespace Api.Controllers
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Success([FromForm] string tran_id, [FromForm] string val_id)
         {
+            Console.WriteLine($"This Payment Success {tran_id} & {val_id}");
             var result = await _service.PaymentSuccessAsync(tran_id, val_id);
 
             return result.Success
-                ? Redirect("http://localhost:4200/payment/success?tranId=" + tran_id)
+                ? Redirect("http://localhost:4200/payments")
+                //Redirect("http://localhost:4200/payment/success?tranId=" + tran_id)
                 : Redirect("http://localhost:4200/payment/failed");
         }
 
@@ -40,8 +43,9 @@ namespace Api.Controllers
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Fail([FromForm] string tran_id)
         {
+            Console.WriteLine("This Payment Failed");
             await _service.PaymentFailAsync(tran_id);
-            return Redirect("https://yourfrontend.com/payment/failed");
+            return Redirect("http://localhost:4200/payment/failed");
         }
 
         // SSLCommerz POSTs here on cancel
@@ -70,6 +74,26 @@ namespace Api.Controllers
         {
             var result = await _service.GetPaymentByIdAsync(paymentId);
             return result.Success ? Ok(result) : NotFound(result);
+        }
+
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            // Pass userId and role from JWT
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var role = User.FindFirstValue(ClaimTypes.Role)!;
+
+            var result = await _service.GetAllPaymentsAsync(userId, role);
+            return result.Success ? Ok(result) : NotFound(result);
+        }
+
+        // PaymentController.cs
+        [HttpPost("cash")]
+        [Authorize(Roles = "Admin,Lawyer")]
+        public async Task<IActionResult> CashPayment([FromBody] CashPaymentDto dto)
+        {
+            var result = await _service.CashPaymentAsync(dto);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
     }
 }

@@ -1,5 +1,8 @@
-﻿using Business.DTO.Case;
+﻿using System.Security.Claims;
+using Business.DTO.Case;
 using Business.Services;
+using Database.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -50,6 +53,22 @@ namespace Api.Controllers
             var result = await _service.DeleteCase(caseId);
             if (!result.Success) return BadRequest(result);
             return Ok(result);
+        }
+
+        [HttpGet("getcasebylawyer/{userId}")]
+        public async Task<IActionResult> GetAsLawyer(string userId)
+        {
+            var result = await _service.GetAllCaseByLawyer(userId);
+            if (!result.Success) return BadRequest(result);
+            return Ok(result);
+        }
+        [HttpGet("all")]
+        public async Task<IActionResult> All()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var role = User.FindFirstValue(ClaimTypes.Role)!;
+            var result = await _service.AllCases(userId, role);
+            return result.Success ? Ok(result) : NotFound(result);
         }
     }
 }

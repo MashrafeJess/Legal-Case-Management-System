@@ -1,4 +1,6 @@
-﻿using System.Security.Claims;
+﻿using System.Diagnostics.Metrics;
+using System.Security.Claims;
+using System.Text.Json;
 using AIT.Packages.SSLCommerz;
 using AIT.Packages.SSLCommerz.Payload;
 using AIT.Packages.SSLCommerz.Utils;
@@ -10,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using static Business.DTO.Payment.PaymentDto;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
 
 namespace Business.Services
 {
@@ -46,10 +49,11 @@ namespace Business.Services
                 Amount = dto.Amount,
                 PaymentMethodId = dto.PaymentMethodId,
                 CaseId = dto.CaseId,
+                HearingId = dto.HearingId,
                 Status = "PENDING",
                 CreatedBy = userId
             };
-
+            payment.TransactionId = payment.PaymentId;
             _context.Payment.Add(payment);
             var saveResult = await Result.DBCommitAsync(
                 _context, "Payment initiated", _logger, "Failed to create payment", payment);
@@ -99,38 +103,78 @@ namespace Business.Services
         // ─── Success Callback ───────────────────────────────────────────
         public async Task<Result> PaymentSuccessAsync(string tranId, string valId)
         {
+            _logger.LogInformation("Success callback — TranId: {TranId}, ValId: {ValId}",
+                tranId, valId);
+
+            // ✅ Only validate in production — sandbox val_id expires too fast
+            if (!_settings.IsSandbox)
+            {
+                const string validationUrl =
+                    "https://securepay.sslcommerz.com/validator/api/validationserverAPI.php" +
+                    "?val_id={valId}" +
+                    "&store_id={_settings.StoreId}" +
+                    "&store_passwd={_settings.StorePassword}" +
+                    "&v=1&format=json";
+
+                try
+                {
+                    using var httpClient = new HttpClient();
+                    var response = await httpClient.GetStringAsync(validationUrl);
+                    var validation = JsonSerializer.Deserialize<JsonElement>(response);
+                    var status = validation.GetProperty("status").GetString();
+
+                    _logger.LogInformation("SSLCommerz validation status: {Status}", status);
+
+                    if (status != "VALID" && status != "VALIDATED")
+                        return new Result(false, $"Validation failed: {status}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Validation call failed");
+                    return new Result(false, "Could not validate payment");
+                }
+            }
+            else
+            {
+                // Sandbox — just log and skip validation
+                _logger.LogInformation("Sandbox mode — skipping SSLCommerz validation");
+            }
+
+            // Find payment
             var payment = await _context.Payment
-                .FirstOrDefaultAsync(p => p.PaymentId == tranId && !p.IsDeleted);
+                .FirstOrDefaultAsync(p => p.TransactionId == tranId);
+
+            _logger.LogInformation("Payment lookup — Found: {Found}", payment != null);
 
             if (payment == null)
-                return new Result(false, "Payment record not found");
-
-            // Don't process already completed payments
-            if (payment.Status == "SUCCESS")
-                return new Result(true, "Payment already processed");
-
-            // Validate with SSLCommerz
-            var environment = _settings.IsSandbox
-                ? SSLCommerzPaymentEnvironment.SANDBOX
-                : SSLCommerzPaymentEnvironment.LIVE;
-
-            var validation = await AITSSLCommerzClient.GetPaymentValidationStatusAsync(
-                validationId: valId,
-                storeId: _settings.StoreId,
-                storePassword: _settings.StorePassword,
-                environment: environment
-            );
-
-            if (!validation.IsSuccess)
-                return new Result(false, "Payment validation failed");
+                return new Result(false, "Payment not found");
 
             payment.Status = "SUCCESS";
             payment.ValidationId = valId;
-            payment.TransactionId = tranId;
-            payment.UpdatedBy = "SYSTEM";
-            payment.UpdatedDate = DateTime.UtcNow;
-
             _context.Payment.Update(payment);
+
+            if (payment.HearingId == null)
+            {
+                var caseEntity = await _context.Case
+                    .FirstOrDefaultAsync(c => c.CaseId == payment.CaseId);
+                if (caseEntity != null)
+                {
+                    caseEntity.IsConsultationFeePaid = true;
+                    _context.Case.Update(caseEntity);
+                }
+            }
+            else
+            {
+                var hearing = await _context.Hearing
+                    .FirstOrDefaultAsync(h => h.HearingID == payment.HearingId);
+                if (hearing != null)
+                {
+                    hearing.IsPaid = true;
+                    hearing.UpdatedDate = DateTime.UtcNow;
+                    _context.Hearing.Update(hearing);
+                }
+            }
+
             return await Result.DBCommitAsync(_context, "Payment successful", _logger);
         }
 
@@ -176,6 +220,7 @@ namespace Business.Services
                 .Select(p => new PaymentResponseDto
                 {
                     PaymentId = p.PaymentId,
+                    CaseId = p.CaseId,
                     Amount = p.Amount,
                     Status = p.Status!,
                     TransactionId = p.TransactionId,
@@ -203,6 +248,7 @@ namespace Business.Services
                 .Select(p => new PaymentResponseDto
                 {
                     PaymentId = p.PaymentId,
+                    CaseId = p.CaseId,
                     Amount = p.Amount,
                     Status = p.Status!,
                     TransactionId = p.TransactionId,
@@ -220,6 +266,84 @@ namespace Business.Services
             return payment != null
                 ? new Result(true, "Payment found", payment)
                 : new Result(false, "Payment not found");
+        }
+
+        public async Task<Result> GetAllPaymentsAsync(string userId, string role)
+        {
+            var query = _context.Payment
+                .Where(p => !p.IsDeleted);
+
+            // Admin sees all — Lawyer and Client see only their own
+            if (role != "Admin")
+                query = query.Where(p => p.CreatedBy == userId);
+
+            var payments = await query
+                .Select(p => new PaymentResponseDto
+                {
+                    PaymentId = p.PaymentId,
+                    CaseId = p.CaseId,
+                    Amount = p.Amount,
+                    Status = p.Status!,
+                    TransactionId = p.TransactionId,
+                    ValidationId = p.ValidationId,
+                    PaymentMethodName = p.Method!.PaymentMethodName,
+                    CreatedBy = _context.User
+                        .Where(u => u.UserId == p.CreatedBy)
+                        .Select(u => u.UserName)
+                        .FirstOrDefault() ?? "Unknown",
+                    CreatedDate = (DateTime)p.CreatedDate!
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            return payments.Count > 0
+                ? new Result(true, "Payments retrieved", payments)
+                : new Result(false, "No payments found");
+        }
+
+        public async Task<Result> CashPaymentAsync(CashPaymentDto dto)
+        {
+            var userId = _accessor.HttpContext?.User?
+                .FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var payment = new Payment
+            {
+                Amount = dto.Amount,
+                PaymentMethodId = dto.PaymentMethodId,
+                CaseId = dto.CaseId,
+                HearingId = dto.HearingId,
+                Status = "SUCCESS",      // ✅ immediately success
+                CreatedBy = userId
+            };
+            payment.TransactionId = payment.PaymentId;
+
+            _context.Payment.Add(payment);
+
+            // ✅ Mark case/hearing paid immediately
+            if (dto.HearingId == null)
+            {
+                var caseEntity = await _context.Case
+                    .FirstOrDefaultAsync(c => c.CaseId == dto.CaseId);
+                if (caseEntity != null)
+                {
+                    caseEntity.IsConsultationFeePaid = true;
+                    _context.Case.Update(caseEntity);
+                }
+            }
+            else
+            {
+                var hearing = await _context.Hearing
+                    .FirstOrDefaultAsync(h => h.HearingID == dto.HearingId);
+                if (hearing != null)
+                {
+                    hearing.IsPaid = true;
+                    hearing.UpdatedDate = DateTime.UtcNow;
+                    _context.Hearing.Update(hearing);
+                }
+            }
+
+            return await Result.DBCommitAsync(
+                _context, "Cash payment recorded successfully", _logger);
         }
     }
 }

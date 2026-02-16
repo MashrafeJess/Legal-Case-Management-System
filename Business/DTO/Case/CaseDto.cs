@@ -25,6 +25,7 @@ namespace Business.DTO.Case
         public string CaseName { get; set; } = string.Empty;
         public string CaseHandlingBy { get; set; } = string.Empty;
         public int Fee { get; set; }
+        public bool IsConsultationFeePaid { get; set; }
         public ICollection<IFormFile>? FormFiles { get; set; }
     }
 }

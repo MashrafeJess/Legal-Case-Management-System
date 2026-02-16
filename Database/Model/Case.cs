@@ -22,6 +22,7 @@ namespace Database.Model
 
         public int HearingNumber { get; set; }
         public int Fee { get; set; }
+        public bool IsConsultationFeePaid { get; set; } = false;
 
         [ForeignKey(nameof(CaseHandlingBy))]
         public User? CaseHandlingByUser { get; set; }

@@ -11,6 +11,7 @@ namespace Database.Model
         public string PaymentId { get; set; } = Guid.NewGuid().ToString();
 
         public int CaseId { get; set; }
+        public int? HearingId { get; set; }
         public int Amount { get; set; }
         public string? Status { get; set; } = "PENDING";
         public string? ValidationId { get; set; } = string.Empty;

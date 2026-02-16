@@ -179,5 +179,27 @@ namespace Business.Services
 
             return new Result(true, $"Reminders sent: {sent}, Failed: {failed}");
         }
+
+        public async Task<Result> GetHearingsByCaseIdAsync(int caseId)
+        {
+            var hearings = await _context.Hearing
+                .Where(h => h.CaseId == caseId && !h.IsDeleted)
+                .Select(h => new
+                {
+                    h.HearingID,
+                    h.CaseId,
+                    h.HearingDate,
+                    h.IsGoing,
+                    h.IsPaid,
+                    h.CreatedBy,
+                    h.CreatedDate
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            return hearings.Count > 0
+                ? new Result(true, "Hearings found", hearings)
+                : new Result(false, "No hearings found for this case");
+        }
     }
 }

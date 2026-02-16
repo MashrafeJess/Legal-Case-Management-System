@@ -6,6 +6,7 @@ using Database;
 using Database.Context;
 using Database.Model;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services
 {
@@ -62,7 +63,20 @@ namespace Business.Services
             {
                 return new Result { Success = false, Message = "SMTP Configuration Not Found" };
             }
-            return new Result(true,"Smtp retrieved successfully",smtpConfig);
+            return new Result(true, "Smtp retrieved successfully", smtpConfig);
+        }
+
+        public async Task<Result> GetAll()
+        {
+            var list = await _context.SmtpSettings
+               .Where(h => !h.IsDeleted)
+               .AsNoTracking()
+               .ToListAsync();
+            if (list.Count == 0)
+            {
+                return new Result(false, "No Smtp Found");
+            }
+            return new Result(true, "All smtp found", list);
         }
     }
 }

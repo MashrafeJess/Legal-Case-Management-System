@@ -67,10 +67,24 @@ namespace Api.Controllers
             }
         }
 
-        [HttpGet("getById")]
+        [HttpGet("getById/{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var result = await _service.GetSmtp(id);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result.Message);
+            }
+        }
+
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _service.GetAll();
             if (result.Success)
             {
                 return Ok(result);

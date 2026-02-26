@@ -413,8 +413,8 @@ This project is licensed under the MIT License.
 ## 📞 Support
 
 For issues and questions:
-- Email: support@jurisflow.com
-- GitHub Issues: [Create an issue](https://github.com/yourusername/jurisflow-backend/issues)
+- Email: mashrafeiubat@gmail.com
+- GitHub Issues: [Create an issue](https://github.com/mashrafejess/jurisflow-backend/issues)
 
 ---
 

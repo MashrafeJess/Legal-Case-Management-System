@@ -3,6 +3,7 @@ using System;
 using Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Database.Migrations
 {
     [DbContext(typeof(LMSContext))]
-    partial class LMSContextModelSnapshot : ModelSnapshot
+    [Migration("20260216214403_SixthCreate")]
+    partial class SixthCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,10 +42,6 @@ namespace Database.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<string>("CaseStatus")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int?>("CaseTypeId")
                         .HasColumnType("integer");
@@ -134,9 +133,6 @@ namespace Database.Migrations
 
                     b.Property<int>("CaseId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("CaseStatus")
-                        .HasColumnType("text");
 
                     b.Property<string>("CommentText")
                         .IsRequired()
@@ -252,9 +248,6 @@ namespace Database.Migrations
                     b.Property<bool>("IsGoing")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("ReminderSent")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("UpdatedBy")
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
@@ -320,65 +313,6 @@ namespace Database.Migrations
                     b.HasIndex("SenderUserId");
 
                     b.ToTable("MailLog");
-                });
-
-            modelBuilder.Entity("Database.Model.NOC", b =>
-                {
-                    b.Property<int>("NOCId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("NOCId"));
-
-                    b.Property<DateTime>("AppliedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("AppliedByUserId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ApprovedByUserId")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<int>("CaseId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("NOCId");
-
-                    b.HasIndex("AppliedByUserId");
-
-                    b.HasIndex("ApprovedByUserId");
-
-                    b.HasIndex("CaseId");
-
-                    b.ToTable("NOC");
                 });
 
             modelBuilder.Entity("Database.Model.Payment", b =>
@@ -536,39 +470,6 @@ namespace Database.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Database.Model.Salary", b =>
-                {
-                    b.Property<int>("SalaryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SalaryId"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("SalaryId");
-
-                    b.ToTable("Salary");
-                });
-
             modelBuilder.Entity("Database.Model.SmtpSettings", b =>
                 {
                     b.Property<int>("SmtpId")
@@ -691,9 +592,6 @@ namespace Database.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("SalaryId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("UpdatedBy")
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
@@ -709,8 +607,6 @@ namespace Database.Migrations
                     b.HasKey("UserId");
 
                     b.HasIndex("RoleId");
-
-                    b.HasIndex("SalaryId");
 
                     b.ToTable("User");
                 });
@@ -771,32 +667,6 @@ namespace Database.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("Database.Model.NOC", b =>
-                {
-                    b.HasOne("Database.Model.User", "AppliedByUser")
-                        .WithMany()
-                        .HasForeignKey("AppliedByUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Database.Model.User", "ApprovedByUser")
-                        .WithMany()
-                        .HasForeignKey("ApprovedByUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Database.Model.Case", "Case")
-                        .WithMany()
-                        .HasForeignKey("CaseId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("AppliedByUser");
-
-                    b.Navigation("ApprovedByUser");
-
-                    b.Navigation("Case");
-                });
-
             modelBuilder.Entity("Database.Model.Payment", b =>
                 {
                     b.HasOne("Database.Model.PaymentMethod", "Method")
@@ -816,13 +686,7 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Database.Model.Salary", "Salary")
-                        .WithMany()
-                        .HasForeignKey("SalaryId");
-
                     b.Navigation("Role");
-
-                    b.Navigation("Salary");
                 });
 
             modelBuilder.Entity("Database.Model.Case", b =>

@@ -1,4 +1,5 @@
-﻿using Business;
+﻿using System.Security.Claims;
+using Business;
 using Business.DTO.Mail;
 using Business.DTO.Smtp;
 using Business.Services;
@@ -93,6 +94,15 @@ namespace Api.Controllers
             {
                 return BadRequest(result.Message);
             }
+        }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllEmail()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var role = User.FindFirstValue(ClaimTypes.Role)!;
+            var result = await _emailService.GetAllAsync(userId, role);
+            return result.Success ? Ok(result) : NotFound(result);
         }
     }
 }

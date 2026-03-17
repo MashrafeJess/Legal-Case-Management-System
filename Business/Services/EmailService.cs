@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Drawing;
+using System.Security.Claims;
 using Business.DTO.Hearing;
 using Business.DTO.Mail;
 using Database.Context;
@@ -7,7 +8,10 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MimeKit;
+using Npgsql.Internal;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Business.Services
 {
@@ -15,11 +19,13 @@ namespace Business.Services
         SmtpService smtpService,
         OTPService otpService,
         LMSContext context,
+        ILogger<EmailService> logger,
         IHttpContextAccessor accessor)
     {
         private readonly SmtpService _smtpService = smtpService;
         private readonly OTPService _otpService = otpService;
         private readonly LMSContext _context = context;
+        private readonly ILogger<EmailService> _logger = logger;
         private readonly IHttpContextAccessor _accessor = accessor;
 
         // ─── Existing OTP Email ─────────────────────────────────────────
@@ -121,6 +127,29 @@ namespace Business.Services
             if (!result.Success)
                 return result;
 
+            _logger.LogInformation("Mail sent — now saving log to DB");
+
+            var log = new MailLog
+            {
+                SenderUserId = senderId!,
+                ReceiverUserId = dto.ReceiverUserId,
+                Subject = dto.Subject,
+                Body = dto.Body,
+                SentAt = DateTime.UtcNow,
+                CreatedBy = senderId
+            };
+
+            _context.MailLog.Add(log);
+
+            _logger.LogInformation("MailLog created — SenderUserId: {S}, ReceiverUserId: {R}",
+                log.SenderUserId, log.ReceiverUserId);
+
+            var result1 = await Result.DBCommitAsync(
+                _context, "Mail sent successfully", _logger);
+            if (!result1.Success)
+            {
+                return result1;
+            }
             // Return mail summary on success
             return new Result(true, "Email sent successfully", new MailResponseDto
             {
@@ -189,6 +218,166 @@ namespace Business.Services
             return await SendAsync(smtpConfig, message);
         }
 
+        //--- Confirmation Mail After Payment -----
+        public async Task<Result> SendPaymentConfirmationEmailAsync(Payment payment)
+        {
+            // Get user who paid
+            var user = await _context.User
+                .FirstOrDefaultAsync(u => u.UserId == payment.CreatedBy);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found for payment confirmation: {UserId}", payment.CreatedBy);
+                return new Result(false, "");
+            }
+
+            // Get case details
+            var caseData = await _context.Case
+                .Include(c => c.Type)
+                .Include(c => c.CaseHandlingByUser)
+                .FirstOrDefaultAsync(c => c.CaseId == payment.CaseId);
+            if (caseData == null)
+            {
+                _logger.LogWarning("Case not found for payment confirmation: {CaseId}", payment.CaseId);
+                return new Result(false, "Case Data not found");
+            }
+
+            // Get payment method
+            var method = await _context.PaymentMethod
+                .FirstOrDefaultAsync(m => m.PaymentMethodId == payment.PaymentMethodId);
+
+            // Get hearing if applicable
+            string paymentType = "Consultation Fee";
+            string hearingDate = "—";
+            if (payment.HearingId != null)
+            {
+                var hearing = await _context.Hearing
+                    .FirstOrDefaultAsync(h => h.HearingID == payment.HearingId);
+                if (hearing != null)
+                {
+                    paymentType = "Hearing Fee";
+                    hearingDate = hearing.HearingDate.ToString("MMMM dd, yyyy");
+                }
+            }
+
+            // Get SMTP config
+            var smtp = await _context.SmtpSettings.FirstOrDefaultAsync(s => !s.IsDeleted);
+            if (smtp == null)
+            {
+                _logger.LogWarning("No SMTP configuration found");
+                return new Result(false, "SMTP configuration not found");
+            }
+
+            // ✅ Build receipt email
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Legal Case Management", smtp.SenderEmail));
+            message.To.Add(new MailboxAddress(user.UserName, user.Email));
+            message.Subject = $"Payment Receipt — {paymentType} Confirmed";
+
+            var htmlBody = $$"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #1a56db 0%, #1e40af 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .header p { margin: 5px 0 0; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .success-badge { background: #10b981; color: white; display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 20px; }
+        .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .info-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+        .info-table td:first-child { font-weight: 600; color: #6b7280; width: 40%; }
+        .info-table td:last-child { color: #1f2937; }
+        .amount-box { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+        .amount-box .label { color: #6b7280; font-size: 14px; margin-bottom: 5px; }
+        .amount-box .amount { font-size: 36px; font-weight: bold; color: #1a56db; }
+        .footer { background: #f9fafb; padding: 20px; text-align: center; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; }
+        .footer a { color: #1a56db; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚖️ Payment Receipt</h1>
+            <p>Legal Case Management System</p>
+        </div>
+        <div class="content">
+            <div class="success-badge">✅ Payment Confirmed</div>
+            <p>Dear <strong>{{user.UserName}}</strong>,</p>
+            <p>Your payment has been successfully processed. Here are the details:</p>
+            
+            <div class="amount-box">
+                <div class="label">Amount Paid</div>
+                <div class="amount">৳ {{payment.Amount:N0}}</div>
+            </div>
+
+            <table class="info-table">
+                <tr>
+                    <td>Transaction ID</td>
+                    <td><strong>{{payment.TransactionId}}</strong></td>
+                </tr>
+                <tr>
+                    <td>Payment Type</td>
+                    <td>{{paymentType}}</td>
+                </tr>
+                <tr>
+                    <td>Payment Method</td>
+                    <td>{{method?.PaymentMethodName ?? "Online"}}</td>
+                </tr>
+                <tr>
+                    <td>Date & Time</td>
+                    <td>{{DateTime.UtcNow:MMMM dd, yyyy 'at' hh:mm tt}}</td>
+                </tr>
+                <tr>
+                    <td>Case Name</td>
+                    <td>{{caseData.CaseName}}</td>
+                </tr>
+                <tr>
+                    <td>Case Type</td>
+                    <td>{{caseData.Type?.CaseTypeName ?? "—"}}</td>
+                </tr>
+                <tr>
+                    <td>Lawyer</td>
+                    <td>{{caseData.CaseHandlingByUser?.UserName ?? "—"}}</td>
+                </tr>
+                {{(payment.HearingId != null ? $@"
+                <tr>
+                    <td>Hearing Date</td>
+                    <td>{hearingDate}</td>
+                </tr>" : "")}}
+            </table>
+
+            <p style="margin-top: 30px; padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; color: #92400e; font-size: 14px;">
+                <strong>📌 Note:</strong> Please keep this receipt for your records. 
+                If you have any questions, contact your assigned lawyer.
+            </p>
+        </div>
+        <div class="footer">
+            <p>This is an automated receipt. Please do not reply to this email.</p>
+            <p>© {{DateTime.UtcNow.Year}} Legal Case Management System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+""";
+
+            message.Body = new BodyBuilder
+            {
+                HtmlBody = htmlBody
+            }.ToMessageBody();
+
+            // ✅ Send email
+            var result = await SendAsync(smtp, message);
+            if(!result.Success)
+            {
+                return result;
+            }
+            return result;
+        }
+
         // ─── Private: Shared SMTP send logic ────────────────────────────
         private static async Task<Result> SendAsync(SmtpSettings smtpConfig, MimeMessage message)
         {
@@ -211,6 +400,36 @@ namespace Business.Services
             {
                 return new Result(false, $"Failed to send email: {ex.Message}");
             }
+        }
+
+        public async Task<Result> GetAllAsync(string userId, string role)
+        {
+            var query = _context.MailLog
+                .Where(m => !m.IsDeleted);
+
+            // Admin sees all — Lawyer/Client see only their own
+            if (role != "Admin")
+                query = query.Where(m => m.SenderUserId == userId);
+
+            var logs = await query
+                .OrderByDescending(m => m.SentAt)
+                .Select(m => new MailResponseDto
+                {
+                    MailLogId = m.MailLogId,
+                    SenderName = m.Sender!.UserName ?? "Unknown",
+                    SenderEmail = m.Sender!.Email ?? "Unknown",
+                    ReceiverName = m.Receiver!.UserName ?? "Unknown",
+                    ReceiverEmail = m.Receiver!.Email ?? "Unknown",
+                    Subject = m.Subject,
+                    Body = m.Body,
+                    SentAt = m.SentAt
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            return logs.Count > 0
+                ? new Result(true, "Mail logs retrieved", logs)
+                : new Result(false, "No mail logs found");
         }
     }
 }

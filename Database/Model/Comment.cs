@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using Database.Enums;
 
 namespace Database.Model
 {
@@ -17,5 +18,6 @@ namespace Database.Model
         public string UserId { get; set; } = string.Empty;
 
         public int CaseId { get; set; }
+        public string ?CaseStatus { get; set; } = string.Empty;
     }
 }

@@ -29,7 +29,7 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("alltype")]
+        [HttpGet("allbycase")]
         public async Task<IActionResult> GetAll(int caseId)
         {
             var result = await _service.Get(caseId);

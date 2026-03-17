@@ -19,9 +19,22 @@ namespace Business.Services
             {
                 CommentText = comment.CommentText,
                 UserId = comment.UserId,
-                CaseId = comment.CaseId
+                CaseId = comment.CaseId,
+                CaseStatus = comment.CaseStatus
             };
             await _context.Comment.AddAsync(entity);
+            if (!string.IsNullOrWhiteSpace(comment.CaseStatus))
+            {
+                var caseEntity = await _context.Case
+                    .FirstOrDefaultAsync(c => c.CaseId == comment.CaseId
+                                           && !c.IsDeleted);
+                if (caseEntity != null)
+                {
+                    caseEntity.CaseStatus = comment.CaseStatus;
+                    caseEntity.UpdatedDate = DateTime.UtcNow;
+                    _context.Case.Update(caseEntity);
+                }
+            }
             var result = await Result.DBCommitAsync(_context, "Comment Created", null, "Creation Failed", entity);
             return result;
         }
@@ -35,6 +48,19 @@ namespace Business.Services
             }
             entity = comment;
             _context.Comment.Update(entity);
+            if (!string.IsNullOrWhiteSpace(comment.CaseStatus))
+            {
+                var caseEntity = await _context.Case
+                    .FirstOrDefaultAsync(c => c.CaseId == comment.CaseId
+                                           && !c.IsDeleted);
+                if (caseEntity != null)
+                {
+                    caseEntity.CaseStatus = comment.CaseStatus;
+                    caseEntity.UpdatedDate = DateTime.UtcNow;
+                    caseEntity.CaseStatus = comment.CaseStatus;
+                    _context.Case.Update(caseEntity);
+                }
+            }
             return await Result.DBCommitAsync(_context, "Comment updated successfully", null, data: entity);
         }
 
@@ -54,6 +80,14 @@ namespace Business.Services
         {
             var list = await _context.Comment
                                     .Where(c => c.CaseId == caseId && !c.IsDeleted)
+                                    .Select(s => new
+                                    {
+                                        s.CaseStatus,
+                                        s.CommentId,
+                                        s.CommentText,
+                                        CreatedUserName =  _context.User.Where(c => c.UserId == s.UserId).Select(c => c.UserName).FirstOrDefault(),
+                                        s.CreatedDate
+                                    })
                                     .ToListAsync();
 
             return new Result(true, "All comments found for that comment", list);

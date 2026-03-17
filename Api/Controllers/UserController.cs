@@ -74,5 +74,36 @@ namespace Api.Controllers
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }
+
+        [HttpGet("clients")]
+        public async Task<IActionResult> GetClients()
+        {
+            var result = await _userService.GetClients();
+            if (!result.Success) return BadRequest(result);
+            return Ok(result);
+        }
+
+        [HttpGet("lawyers_clients")]
+        public async Task<IActionResult> GetBoth()
+        {
+            var result = await _userService.GetLawyerClient();
+            if (!result.Success) return BadRequest(result);
+            return Ok(result);
+        }
+        [HttpPost("verify")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Verify([FromBody] VerifyDto dto)
+        {
+            var result = await _userService.VerifyAsync(dto);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("resend-otp")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendOtp([FromBody] ResendOtpDto dto)
+        {
+            var result = await _userService.ResendOtpAsync(dto);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
     }
 }

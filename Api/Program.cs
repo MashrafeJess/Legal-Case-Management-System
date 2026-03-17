@@ -67,6 +67,8 @@ builder.Services.AddScoped<SmtpService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<OTPService>();
+builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<NOCService>();
 
 builder.Services.AddHostedService<HearingReminderJob>(); // Background Job
 

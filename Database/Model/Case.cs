@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Database.Enums;
 
 namespace Database.Model
 {
@@ -23,6 +24,8 @@ namespace Database.Model
         public int HearingNumber { get; set; }
         public int Fee { get; set; }
         public bool IsConsultationFeePaid { get; set; } = false;
+
+        public string CaseStatus { get; set; } = CaseStatusConstants.Ongoing;
 
         [ForeignKey(nameof(CaseHandlingBy))]
         public User? CaseHandlingByUser { get; set; }

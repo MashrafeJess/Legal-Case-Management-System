@@ -23,6 +23,9 @@ namespace Database.Context
         public DbSet<User> User { get; set; }
         public DbSet<CaseType> CaseType { get; set; }
         public DbSet<FileEntity> FileEntity { get; set; }
+        public DbSet<MailLog> MailLog { get; set; }
+        public DbSet<Salary> Salary { get; set; }
+        public DbSet<NOC> NOC { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,6 +40,36 @@ namespace Database.Context
                     UpdatedDate = null
                 }
             );
+            modelBuilder.Entity<MailLog>()
+    .HasOne(m => m.Sender)
+    .WithMany()
+    .HasForeignKey(m => m.SenderUserId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MailLog>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m => m.ReceiverUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<NOC>()
+    .HasOne(n => n.Case)
+    .WithMany()
+    .HasForeignKey(n => n.CaseId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<NOC>()
+                .HasOne(n => n.AppliedByUser)
+                .WithMany()
+                .HasForeignKey(n => n.AppliedByUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<NOC>()
+                .HasOne(n => n.ApprovedByUser)
+                .WithMany()
+                .HasForeignKey(n => n.ApprovedByUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<Role>().HasData(
             new Role
             {

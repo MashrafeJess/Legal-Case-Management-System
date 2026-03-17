@@ -9,11 +9,13 @@
 
     public class MailResponseDto
     {
+        public int MailLogId { get; set; }
         public string SenderName { get; set; } = string.Empty;
         public string SenderEmail { get; set; } = string.Empty;
         public string ReceiverName { get; set; } = string.Empty;
         public string ReceiverEmail { get; set; } = string.Empty;
         public string Subject { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
     }
 }

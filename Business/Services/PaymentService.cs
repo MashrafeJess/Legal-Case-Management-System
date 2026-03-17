@@ -18,11 +18,13 @@ namespace Business.Services
 {
     public class PaymentService(
         LMSContext context,
+        EmailService service,
         IHttpContextAccessor accessor,
         IOptions<SSLCommerzSettings> settings,
         ILogger<PaymentService> logger)
     {
         private readonly LMSContext _context = context;
+        private readonly EmailService _service = service;
         private readonly IHttpContextAccessor _accessor = accessor;
         private readonly SSLCommerzSettings _settings = settings.Value;
         private readonly ILogger<PaymentService> _logger = logger;
@@ -175,7 +177,17 @@ namespace Business.Services
                 }
             }
 
-            return await Result.DBCommitAsync(_context, "Payment successful", _logger);
+            var CommitResult = await Result.DBCommitAsync(_context, "Payment successful", _logger);
+            if (CommitResult.Success)
+            {
+                //User? user = await _context.User.FirstAsync(u => u.Email == payment.);
+                var result = await _service.SendPaymentConfirmationEmailAsync(payment);
+                if (!result.Success)
+                {
+                    return result;
+                }
+            }
+            return CommitResult;
         }
 
         // ─── Fail Callback ──────────────────────────────────────────────
@@ -312,38 +324,50 @@ namespace Business.Services
                 PaymentMethodId = dto.PaymentMethodId,
                 CaseId = dto.CaseId,
                 HearingId = dto.HearingId,
-                Status = "SUCCESS",      // ✅ immediately success
+                Status = "SUCCESS",
                 CreatedBy = userId
             };
-            payment.TransactionId = payment.PaymentId;
 
             _context.Payment.Add(payment);
 
-            // ✅ Mark case/hearing paid immediately
+            object? returnData = null;
+
             if (dto.HearingId == null)
             {
                 var caseEntity = await _context.Case
                     .FirstOrDefaultAsync(c => c.CaseId == dto.CaseId);
+
                 if (caseEntity != null)
                 {
                     caseEntity.IsConsultationFeePaid = true;
-                    _context.Case.Update(caseEntity);
+                    caseEntity.UpdatedDate = DateTime.UtcNow;
+
+                    returnData = caseEntity;
                 }
             }
             else
             {
                 var hearing = await _context.Hearing
                     .FirstOrDefaultAsync(h => h.HearingID == dto.HearingId);
+
                 if (hearing != null)
                 {
                     hearing.IsPaid = true;
                     hearing.UpdatedDate = DateTime.UtcNow;
-                    _context.Hearing.Update(hearing);
+
+                    returnData = hearing;
                 }
             }
 
-            return await Result.DBCommitAsync(
-                _context, "Cash payment recorded successfully", _logger);
+            var result = await Result.DBCommitAsync(
+                _context,
+                "Cash payment recorded successfully",
+                _logger,
+                null,
+                returnData as Hearing);
+
+            return result;
         }
+
     }
 }

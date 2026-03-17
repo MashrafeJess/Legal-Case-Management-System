@@ -244,7 +244,7 @@ namespace Business.Services
 
             return list.Count > 0
                 ? new Result(true, "All cases found", list)
-                : new Result(false, "Case Fetch Failed");
+                : new Result(false, "No Case Found. Add New Case Please!");
         }
     }
 }

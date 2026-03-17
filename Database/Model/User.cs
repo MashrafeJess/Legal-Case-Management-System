@@ -24,13 +24,13 @@ namespace Database.Model
         public string? Address { get; set; } = string.Empty;
 
         public int RoleId { get; set; }
+        public bool IsVerified { get; set; } = false;
+        public int? SalaryId { get; set; }
 
         [ForeignKey(nameof(RoleId))]
         public Role? Role { get; set; }
 
-        public static implicit operator string?(User? v)
-        {
-            throw new NotImplementedException();
-        }
+        [ForeignKey(nameof(SalaryId))]
+        public Salary? Salary { get; set; }
     }
 }

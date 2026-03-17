@@ -13,9 +13,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Business.Services
 {
-    public class UserService(LMSContext context, IHttpContextAccessor accessor, IConfiguration config, ILogger<UserService> logger)
+    public class UserService(LMSContext context,EmailService service, IHttpContextAccessor accessor, IConfiguration config, ILogger<UserService> logger)
     {
         private readonly LMSContext _context = context;
+        private readonly EmailService _service = service;
         private readonly IHttpContextAccessor _accessor = accessor;
         private readonly IConfiguration _config = config;
         private readonly ILogger<UserService> _logger = logger;
@@ -40,7 +41,9 @@ namespace Business.Services
                 UserName = user.UserName,
                 Email = user.Email,
                 Password = new PasswordHasher<RegistrationDto>().HashPassword(user, user.Password),
-                RoleId = user.RoleId == 0 ? 3 : user.RoleId
+                RoleId = user.RoleId == 0 ? 3 : user.RoleId,
+                Address = user.Address,
+                CreatedBy = _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
             };
 
             _context.User.Add(entity);
@@ -50,22 +53,17 @@ namespace Business.Services
                 return result;
             }
 
-            entity = await _context.User
-                   .Include(u => u.Role)  // join Role table
-                   .FirstOrDefaultAsync(u => u.RoleId == user.RoleId);
-
-            if (entity == null)
-                return new Result(false, "Could not retrieve user after registration");
-
-            string token = GenerateJwt(entity);
-
-            return new Result(true, "Registration successful", new LoginResponseDto
+            var otpResult = await _service.SendOtpEmailAsync( entity.Email);
+            if (!otpResult.Success)
             {
-                UserId = entity.UserId,
-                Token = token,
-                UserName = entity.UserName,
-                Email = entity.Email,
-                Role = entity.Role?.RoleName ?? "Guest"
+                _logger.LogWarning("OTP send failed for {Email}: {Msg}",
+                    entity.Email, otpResult.Message);
+                // Don't fail registration — just warn
+            }
+
+            return new Result(true, "Registration successful. Please verify your email.", new
+            {
+                userId = entity.UserId
             });
         }
 
@@ -87,6 +85,15 @@ namespace Business.Services
             if (verify == PasswordVerificationResult.Failed)
                 return new Result(false, "Incorrect password");
 
+            if (!userInfo.IsVerified)
+            {
+                return new Result(false, "Account not verified. Please check your email for OTP.", new
+                {
+                    userId = userInfo.UserId,
+                    isVerified = false
+                });
+            }
+
             User? entity = await _context.User
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Email == user.Email && !u.IsDeleted);
@@ -101,7 +108,69 @@ namespace Business.Services
                 Role = entity.Role?.RoleName ?? "User"
             });
         }
+        public async Task<Result> VerifyAsync(VerifyDto dto)
+        {
+            var user = await _context.User
+                .FirstOrDefaultAsync(u => u.UserId == dto.UserId && !u.IsDeleted);
+            if (user == null)
+                return new Result(false, "User not found");
 
+            if (user.IsVerified)
+                return new Result(true, "Account already verified");
+
+            // Find valid token
+            var token = await _context.Token
+                .Where(t => t.Email == user.Email
+                         && t.TokenId == dto.Code
+                         && !t.IsExpired)
+                .FirstOrDefaultAsync();
+
+            if (token == null)
+                return new Result(false, "Invalid OTP. Please try again.");
+
+            // Check expiry
+            if (DateTime.UtcNow > token.CreatedAt + token.Delay)
+            {
+                token.IsExpired = true;
+                _context.Token.Update(token);
+                await _context.SaveChangesAsync();
+                return new Result(false, "OTP expired. Please request a new one.");
+            }
+
+            // ✅ Mark verified
+            user.IsVerified = true;
+            user.UpdatedDate = DateTime.UtcNow;
+            token.IsExpired = true;
+
+            _context.User.Update(user);
+            _context.Token.Update(token);
+
+            return await Result.DBCommitAsync(
+                _context, "Account verified successfully", _logger);
+        }
+        public async Task<Result> ResendOtpAsync(ResendOtpDto dto)
+        {
+            var user = await _context.User
+                .FirstOrDefaultAsync(u => u.UserId == dto.UserId && !u.IsDeleted);
+            if (user == null)
+                return new Result(false, "User not found");
+
+            if (user.IsVerified)
+                return new Result(false, "Account is already verified");
+
+            // Expire all old tokens
+            var oldTokens = await _context.Token
+                .Where(t => t.Email == user.Email && !t.IsExpired)
+                .ToListAsync();
+
+            oldTokens.ForEach(t => t.IsExpired = true);
+            _context.Token.UpdateRange(oldTokens);
+            await _context.SaveChangesAsync();
+
+            // Generate new OTP
+            return await _service.SendOtpEmailAsync(
+                 user.Email);
+        }
         private string GenerateJwt(User user)
         {
             var claims = new[]
@@ -133,6 +202,9 @@ namespace Business.Services
 
             user.Email = user.Email.Trim();
 
+            var currentUserId = _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUserRole = _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Role);
+
             var user1 = await _context.User
                 .Include(x => x.Role)
                 .FirstOrDefaultAsync(u => u.Email == user.Email && !u.IsDeleted);
@@ -140,29 +212,46 @@ namespace Business.Services
             if (user1 == null)
                 return new Result(false, "No user found");
 
-            // ✅ Update fields safely (don’t do: user1 = user)
+            // ✅ Update fields safely
             user1.UserName = user.UserName;
-            user1.RoleId = user.RoleId == 0 ? user1.RoleId : user.RoleId;
+            user1.Address = user.Address;
 
-            // Only hash if a new password is provided
+            // ✅ Only Admin can change role
+            if (user.RoleId != 0)
+            {
+                if (currentUserRole != "Admin")
+                    return new Result(false, "Only Admin can change user roles");
+                user1.RoleId = user.RoleId;
+            }
+
+            // ✅ Only hash if a new password is provided
             if (!string.IsNullOrWhiteSpace(user.Password))
             {
                 user1.Password = new PasswordHasher<User>().HashPassword(user1, user.Password);
             }
+
             user1.UpdatedDate = DateTime.UtcNow;
             user1.UpdatedBy = updatedBy;
+
             _context.User.Update(user1);
             var result = await Result.DBCommitAsync(_context, "User info updated successfully", null, "Failed to update user", user1);
+
             if (!result.Success)
-            {
                 return new Result(false, "Update failed");
-            }
-            return new Result(true, "update successful", new LoginResponseDto
+
+            // ✅ Return updated user with new token if password changed
+            string token = !string.IsNullOrWhiteSpace(user.Password)
+                ? GenerateJwt(user1)
+                : string.Empty;
+
+            return new Result(true, "Update successful", new LoginResponseDto
             {
                 UserId = user1.UserId,
                 UserName = user1.UserName,
                 Email = user1.Email,
+                Address = user1.Address,
                 Role = user1?.Role?.RoleName ?? "User",
+                Token = token
             });
         }
 
@@ -201,6 +290,7 @@ namespace Business.Services
                 UserId = user.UserId,
                 UserName = user.UserName,
                 Email = user.Email,
+                Address = user.Address??"-",
                 Role = user?.Role?.RoleName ?? "User"
             });
         }
@@ -237,6 +327,44 @@ namespace Business.Services
     })
     .AsNoTracking()
     .ToListAsync();
+
+            return list.Count > 0
+                ? new Result(true, "All lawyers are fetched", list)
+                : new Result(false, "No lawyer found", list);
+        }
+
+        public async Task<Result> GetLawyerClient()
+        {
+            var list = await _context.User
+    .Where(u => (u.RoleId == 2 || u.RoleId == 3) && !u.IsDeleted)
+    .Select(u => new LoginResponseDto
+    {
+        UserId = u.UserId,
+        UserName = u.UserName,
+        Email = u.Email,
+        Role = u.Role!.RoleName
+    })
+    .AsNoTracking()
+    .ToListAsync();
+
+            return list.Count > 0
+                ? new Result(true, "All lawyers are fetched", list)
+                : new Result(false, "No lawyer found", list);
+        }
+
+        public async Task<Result> GetClients()
+        {
+            var list = await _context.User
+.Where(u => u.RoleId == 3 && !u.IsDeleted)
+.Select(u => new LoginResponseDto
+{
+    UserId = u.UserId,
+    UserName = u.UserName,
+    Email = u.Email,
+    Role = u.Role!.RoleName
+})
+.AsNoTracking()
+.ToListAsync();
 
             return list.Count > 0
                 ? new Result(true, "All lawyers are fetched", list)

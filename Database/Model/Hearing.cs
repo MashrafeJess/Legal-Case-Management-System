@@ -14,7 +14,7 @@ namespace Database.Model
         public DateTime HearingDate { get; set; }
         public bool IsGoing { get; set; } = true;
         public bool IsPaid = false;
-
+        public bool ReminderSent { get; set; } = false;
         [ForeignKey(nameof(CaseId))]
         public Case? Case { get; set; }
     }

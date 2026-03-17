@@ -12,5 +12,6 @@ namespace Business.DTO.Comment
         public string UserId { get; set; } = string.Empty;
 
         public int CaseId { get; set; }
+        public string? CaseStatus { get; set; } = string.Empty;
     }
 }
